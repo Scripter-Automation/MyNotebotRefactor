@@ -11,28 +11,52 @@ declare global {
 }
 
 interface Notebook {
-	id:string,
-	title:string,
-	topic:string="Default",
-	description?:string = undefined,
-	sections?:Section[]
+    id: string;
+    object_type: string;
+    title: string;
+    topic: string;
+    description?: string;
+    [key: string]: unknown; // Index signature
 }
 
 interface Section {
-	id:string,
-	notebookId:string,
-	title:string,
-	topic:string="Default",
-	description?:string=undefined,
-	notes?:Note[]
+    id: string;
+    object_type: string;
+    notebookId: string;
+    title: string;
+    topic: string;
+    description?: string;
+    [key: string]: unknown; // Index signature
 }
 
 interface Note {
-	id:string,
-	sectionId:string,
-	text:string,
-	tags?:string[],
-	
+    id: string;
+    object_type: string;
+    notebookId: string;
+    sectionId?: string;
+    title: string;
+    tags?: string[];
+    embeding?: number[];
+    [key: string]: unknown; // Index signature
+}
+
+
+interface NoteMessage {
+    id: string;
+    object_type: Notebook_Object_Type.Message;
+    note_id: string;
+    notebookId: string;
+    sectionId?: string;
+    prompt: string;
+    response: string;
+    [key: string]: unknown; // Index signature
+}
+
+enum Notebook_Object_Type {
+    Notebook = "notebook",
+    Section = "section",
+    Note = "note",
+    Message = "message"
 }
 
 enum MessageType {
@@ -48,7 +72,8 @@ interface Message {
 	text:string,
 	user_generated:boolean,
 	options?:MessageOption
-	optionFuncs?:MessageOptionFuncs
 }
 
-export {Notebook, Section, Note, MessageType, Message, MessageOption, MessageOptionFuncs};
+
+
+export {Notebook, Section, Note, MessageType, Message, MessageOption, NoteMessage, Notebook_Object_Type};
