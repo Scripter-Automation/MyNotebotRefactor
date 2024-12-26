@@ -25,7 +25,7 @@ export default class QdrantService{
     }
 
     private async init(){
-        config();
+        //config();
         this.client = new QdrantClient({
             url: process.env.DATABASE_URL,
             apiKey: process.env.QDRANT_API_KEY,
