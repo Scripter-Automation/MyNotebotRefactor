@@ -1,57 +1,19 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { MessageType, Message } from "../../../app";
+    import type { Message } from "../../../app";
     import MessageComponent from "$lib/UI/MessageComponent.svelte";
-
-
+    import QdrantService from "$lib/qdrantService";
+    import Chat from "$lib/ChatService";
 
 
     let messages:Message[] = [] 
+    let chat_service = new Chat(messages)
+
     onMount(()=>{
-        if(messages.length == 0){
-            messages = [...messages,
-            {
-                type:"menu",
-                text:`
-                    Bienvenido a tu chatbot personal, funciono en base a el contexto que tu me hayas hablado en el pasado. 
-                    Usare el contexto de todo lo que hemos hablado para personalizar tus conversaciónes. De esta manera sera posible
-                    que pueda conocerte mejor y podria incluso responder preguntas de ti o de las cosas que me hayas contado.
-                    Puedo incluso hablar especificamente de un cuaderno, seccion o nota. En el siguiente menu veras las opciones de 
-                    crear un nuevo cuaderno donde se empezara una conversacion en blanco e iremos agregando esta informacion a un cuaderno que despues
-                    podras consultar. Al seleccionar un cuaderno este se pondra en contexto y se le agregara informacion a este cuaderno, al igual que se te dara la opción de seleccionar una seccion del cuaderno.
-                    Finalmente si solo deseas conversar el chat puedes ir creando notas en general que no seran agregadas a ningun cuaderno en especifico.
-                `,
-                user_generated:false,
-                options:[{text:"Nuevo cuaderno", func:()=>{
-
-                    messages=[...messages,{
-                        type:"normal",
-                        user_generated:false,
-                        text:"¿Cual es el nombre de tu cuaderno?, ¿Cual es el tema?, ¿Cual es la descripcion?"
-                    } as Message];
-
-                    document.getElementById("Enviar")?.addEventListener("click",()=>{
-                        const response = document.getElementById("UserInput")?.nodeValue;
-                        const values = response!.split(",")
-                        messages=[...messages,{
-                            type:"normal",
-                            text:`Creando cuaderno con nombre ${values[0]}, para el tema ${values[1]} empecare a escribir toda nuestra conversacion es ese cuaderno`
-                        } as Message]
-
-                    },{once:true});
-
-                }}, {text:"Seleccionar cuaderno", func:()=>{
-
-                }}, {text:"Nueva nota", func:()=>{
-                    messages = [...messages, {
-                        type:"normal",
-                        text:'Excelente, empiece a hablar y yo comenzare a almacenar esta conversación en una area de notas generales, sin usar cuaderno'
-                    } as Message]
-                }}]
-            } as Message
-            ]
-        }
+        messages = chat_service.get_messages()
     })
+
+
     let speach_service;
     let user_input = ""
     let listening = false
@@ -85,10 +47,9 @@
         }
         
     }
+    const rag = new QdrantService();
 
     function ask(){
-        //const rag = new RagService("123456789");
-        //rag.ask(user_input);
     }
         
     

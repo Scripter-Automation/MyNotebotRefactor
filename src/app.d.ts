@@ -11,28 +11,33 @@ declare global {
 }
 
 interface Notebook {
-	id:string,
-	title:string,
-	topic:string="Default",
-	description?:string = undefined,
-	sections?:Section[]
+    id: string;
+    object_type: string;
+    title: string;
+    topic: string;
+    description?: string;
+    sections?: Section[];
+    [key: string]: unknown; // Index signature
 }
 
 interface Section {
-	id:string,
-	notebookId:string,
-	title:string,
-	topic:string="Default",
-	description?:string=undefined,
-	notes?:Note[]
+    id: string;
+    object_type: string;
+    notebookId: string;
+    title: string;
+    topic: string;
+    description?: string;
+    notes?: Note[];
+    [key: string]: unknown; // Index signature
 }
 
 interface Note {
-	id:string,
-	sectionId:string,
-	text:string,
-	tags?:string[],
-	
+    id: string;
+    object_type: string;
+    sectionId: string;
+    text: string;
+    tags?: string[];
+    [key: string]: unknown; // Index signature
 }
 
 enum MessageType {
@@ -48,7 +53,14 @@ interface Message {
 	text:string,
 	user_generated:boolean,
 	options?:MessageOption
-	optionFuncs?:MessageOptionFuncs
 }
 
-export {Notebook, Section, Note, MessageType, Message, MessageOption, MessageOptionFuncs};
+enum ChatState{
+    Entire_context=0,
+    Notebook_context=1,
+    Section_context=2,
+    Note_context=3,
+    User_answer=4
+}
+
+export {Notebook, Section, Note, MessageType, Message, MessageOption, ChatState};

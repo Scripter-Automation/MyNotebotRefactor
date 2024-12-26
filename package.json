@@ -32,8 +32,10 @@
 		"@llm-tools/embedjs-mongodb": "^0.1.23",
 		"@llm-tools/embedjs-ollama": "^0.1.23",
 		"@llm-tools/embedjs-openai": "^0.1.23",
+		"@qdrant/js-client-rest": "^1.12.0",
 		"dotenv": "^16.4.7",
 		"firebase": "^11.0.2",
-		"mongodb": "6.11"
+		"mongodb": "6.11",
+		"openai": "^4.76.1"
 	}
 }
