@@ -92,7 +92,8 @@ export default class Chat{
                 options:[
                     {text:"Nuevo cuaderno", func:this.chat_create_notebook.bind(this)},
                     {text:"Seleccionar cuaderno", func:this.chat_select_notebook.bind(this)},
-                    {text:"Nueva nota", func:this.chat_create_note.bind(this)}
+                    {text:"Nueva nota", func:this.chat_create_note.bind(this)},
+                  //  {text:"Seleccionar nota", func:this.chat_select_note.bind(this)}
                 ]
             } as Message
             ]
