@@ -13,12 +13,23 @@ export default class OpenAIService {
     }
 
     public async chat(messages: ChatCompletionMessageParam[]) {
-        const completion = await this.app.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                ...messages
-            ]
-        });
+        let completion
+        try{
+
+            completion = await this.app.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    ...messages
+                ]
+            });
+        }catch{
+            completion = await this.app.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [
+                    ...messages
+                ]
+            });
+        }
         return completion.choices[0].message.content
     }
 

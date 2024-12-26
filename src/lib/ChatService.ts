@@ -53,7 +53,6 @@ export default class Chat{
         // aun falta implementar esta funcionalidad
         try{
             this.notebooks = await this.get_all_notebooks()
-            console.log(this.notebooks);
             this.general_notebook = this.notebooks.filter((notebook)=>notebook.title=="General")[0];
             this.context = {
                 ...this.context,
