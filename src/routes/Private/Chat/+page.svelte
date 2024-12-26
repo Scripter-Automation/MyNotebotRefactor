@@ -2,8 +2,9 @@
     import { onMount } from "svelte";
     import type { Message } from "../../../app";
     import MessageComponent from "$lib/UI/MessageComponent.svelte";
-    import QdrantService from "$lib/qdrantService";
+    import { BsMicFill } from "svelte-icons-pack/bs";
     import Chat from "$lib/ChatService";
+    import { Icon } from "svelte-icons-pack";
 
     let context= {
         notebook: "General",
@@ -69,26 +70,39 @@
         chat_service.respond(user_input)
     }
         
+    function handleKeyDown(event:KeyboardEvent) {
+        if (event.key === 'Enter' && !event.shiftKey) { 
+            event.preventDefault(); // Prevent the default action (new line)
+            ask(); 
+        }
+    }
     
 
 </script>
 <main>
-    <div class="h-[89vh] flex flex-col overflow-y-scroll">
-        <div class="bg-gray-300 p-2 ">
+    <div class="border-b shadow-lg p-4 flex justify-between">
+        <div>
             <h1 class="text-2xl">Contexto Actual: {context.notebook}/{context.section}/{context.note}</h1>
         </div>
+        <div>
+            <button class="border-2 border-red-500 hover:bg-red-500 active:bg-red-700 p-2 rounded active:text-white hover:text-white">Cerrar Sesión</button>
+        </div>
+    </div>
+    <div class="h-[80vh] flex flex-col overflow-y-scroll">
         {#each messages as message}
             <MessageComponent {message}></MessageComponent>
         {/each}
     </div>
 
-    <div class="flex space-x-2 border  rounded p-7 shadow-inner">
-        <div class="w-9/12">
-            <input id="UserInput" class="border rounded w-full p-2" type="text" placeholder="¿De qué quieres hablar?" bind:value={user_input}>
-        </div>
-        <div class="w-3/12">
-            <button on:click={listen} id="Listen" class="bg-blue-500 p-2 text-white rounded">Escuchar</button>
-            <button on:click={ask} id="Enviar" class="bg-blue-500 p-2 text-white rounded">Enviar</button>
+    <div class="w-full flex justify-center">
+        <div class="w-5/6 flex space-x-2 border  rounded p-5 shadow-lg">
+            <div class="w-11/12 relative">
+                <textarea on:keydown={handleKeyDown} id="UserInput" class="border rounded w-full h-full p-2" placeholder="¿De qué quieres hablar?" bind:value={user_input}></textarea>
+                <button on:click={listen} id="Listen" class={`hover:border p-2 ${listening ? "text-red-500" : "text-gray-500"} rounded absolute right-3 top-3`}><Icon src={BsMicFill}></Icon></button>
+            </div>
+            <div class="w-1/12">
+                <button on:click={ask} id="Enviar" class="bg-blue-500 p-2 w-full h-full text-white rounded">Enviar</button>
+            </div>
         </div>
     </div>
 </main>

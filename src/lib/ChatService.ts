@@ -21,7 +21,6 @@ export default class Chat{
     private storage_service = new StorageService();
 
 
-    private current_note?:Note;
 
     private context?:{
         notebook?:string,
@@ -34,11 +33,6 @@ export default class Chat{
         note:"General"
     }
 
-    private storage_context:{notebook?:string, section?:string, note?:string} = {
-        notebook:undefined,
-        section:undefined,
-        note:undefined
-    }
 
 
     private general_notebook?:Notebook;
@@ -58,6 +52,7 @@ export default class Chat{
                 ...this.context,
                 notebook:this.general_notebook.id
             };
+            console.log(this.context)
             this.sections = await this.get_all_sections(this.context?.notebook as string);
             this.context = {
                 ...this.context,
@@ -93,7 +88,7 @@ export default class Chat{
                     {text:"Nuevo cuaderno", func:this.chat_create_notebook.bind(this)},
                     {text:"Seleccionar cuaderno", func:this.chat_select_notebook.bind(this)},
                     {text:"Nueva nota", func:this.chat_create_note.bind(this)},
-                  //  {text:"Seleccionar nota", func:this.chat_select_note.bind(this)}
+                    {text:"Seleccionar nota", func:this.chat_select_note.bind(this)}
                 ]
             } as Message
             ]
@@ -131,8 +126,8 @@ export default class Chat{
         const res = await fetch("/API/QDrant/note/get_all",{
             method:"POST",
             body:JSON.stringify({
-                notebook:this.context?.notebook ?? "General",
-                section:this.context?.section ?? "General"
+                notebook:this.context?.notebook as string,
+                section:this.context?.section as string
             })
         })
         return await res.json();
@@ -171,7 +166,8 @@ export default class Chat{
                     options:[
                         {text:"Nueva seccion", func:this.chat_create_section.bind(this)},
                         {text:"Seleccionar seccion", func:this.chat_select_section.bind(this)},
-                        {text:"Nueva nota", func: this.chat_create_note.bind(this)}
+                        {text:"Nueva nota", func: this.chat_create_note.bind(this)},
+                        {text:"Seleccionar nota", func:this.chat_select_note.bind(this)}
                     ]
                 } as Message])
             }}
@@ -318,10 +314,9 @@ export default class Chat{
 
 
     private chat_select_note(){
-        
         this.get_all_notes().then((notes)=>{
             const options = notes.map((note:any)=>{
-                return {text:note.note, func:()=>{
+                return {text:note.title, func:()=>{
                     this.context = {
                         ...this.context,
                         note:note.id

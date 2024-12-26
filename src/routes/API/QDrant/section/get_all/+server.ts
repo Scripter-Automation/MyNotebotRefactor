@@ -8,7 +8,7 @@ export const POST : RequestHandler = async ({ request }) => {
     const rag = new QdrantService(firebase.get_uid()); 
     let sections;
     try {
-        sections = rag.get_all_sections(data.notebook);
+        sections = await rag.get_all_sections(data.notebook);
     } catch (error) {
         console.error(error);
         return new Response(null, {

@@ -25,7 +25,7 @@ export default class QdrantService{
     }
 
     private async init(){
-        //config();
+        if (process.env.NODE_ENV !== 'production') { config(); }
         this.client = new QdrantClient({
             url: process.env.DATABASE_URL,
             apiKey: process.env.QDRANT_API_KEY,
@@ -163,37 +163,49 @@ export default class QdrantService{
     }
 
 
-    public async get_all_notes(notebook_id:string, section_id:string):Promise<Note[]>{
-        if(this.check_client()){
-            const result = await this.client?.scroll(this.user_id,{
-               filter:{
-                must:[
-                    {
-                        key:"object_type",
-                        match:{
-                            value:"note"
-                        }
-                    },
-                    {
-                        key:"notebookId",
-                        match:{
-                            value:notebook_id
-                        }
-                    },
-                    {
-                        key:"sectionId",
-                        match:{
-                            value:section_id
-
-                        }
+    public async get_all_notes(notebook_id:string, section_id?:string):Promise<Note[]>{
+        console.log("Querying notes", notebook_id, section_id, this.user_id)
+        const filter = {
+            must:[
+                {
+                    key:"object_type",
+                    match:{
+                        value:"note"
                     }
-                ]
-               },
-            });
+                },
+                {
+                    key:"notebookId",
+                    match:{
+                        value:notebook_id
+                    }
+                }
+            ]
+           }
 
-            return result?.points.map((point)=>{
-                return point.payload as Note;
-            }) ?? [];
+        if(section_id){
+            filter.must.push({
+                key:"sectionId",
+                match:{
+                    value:section_id
+                }
+            })
+        }
+
+        if(this.check_client()){
+            console.log(filter)
+            try{
+                const result = await this.client?.scroll(this.user_id,{
+                    filter:filter
+                    });
+                console.log("results", result)
+                return result?.points.map((point)=>{
+                    return point.payload as Note;
+                }) ?? [];
+
+            }catch(error){
+                console.error(error)
+                return []
+            }
         }else{
             throw new Error("Client not initialized")
         }

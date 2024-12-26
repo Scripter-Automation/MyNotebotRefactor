@@ -6,7 +6,7 @@ export default class OpenAIService {
     private app: OpenAI;
 
     constructor() {
-        //config();
+        if (process.env.NODE_ENV !== 'production') { config(); }
         this.app = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });

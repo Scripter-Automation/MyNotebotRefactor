@@ -18,7 +18,7 @@ export default class FirebaseService{
        if(getApps().length!=0){
         this.app= getApps()[0]
        }else{
-        //config();
+        if (process.env.NODE_ENV !== 'production') { config(); }
         this.app = initializeApp({
             apiKey: process.env.FIREBASE_API_KEY,
             authDomain: process.env.FIREBASE_AUTH_DOMAIN,
