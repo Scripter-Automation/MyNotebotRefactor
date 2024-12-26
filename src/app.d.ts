@@ -16,7 +16,6 @@ interface Notebook {
     title: string;
     topic: string;
     description?: string;
-    sections?: Section[];
     [key: string]: unknown; // Index signature
 }
 
@@ -27,17 +26,37 @@ interface Section {
     title: string;
     topic: string;
     description?: string;
-    notes?: Note[];
     [key: string]: unknown; // Index signature
 }
 
 interface Note {
     id: string;
     object_type: string;
-    sectionId: string;
-    text: string;
+    notebookId: string;
+    sectionId?: string;
+    title: string;
     tags?: string[];
+    embeding?: number[];
     [key: string]: unknown; // Index signature
+}
+
+
+interface NoteMessage {
+    id: string;
+    object_type: Notebook_Object_Type.Message;
+    note_id: string;
+    notebookId: string;
+    sectionId?: string;
+    prompt: string;
+    response: string;
+    [key: string]: unknown; // Index signature
+}
+
+enum Notebook_Object_Type {
+    Notebook = "notebook",
+    Section = "section",
+    Note = "note",
+    Message = "message"
 }
 
 enum MessageType {
@@ -55,12 +74,6 @@ interface Message {
 	options?:MessageOption
 }
 
-enum ChatState{
-    Entire_context=0,
-    Notebook_context=1,
-    Section_context=2,
-    Note_context=3,
-    User_answer=4
-}
 
-export {Notebook, Section, Note, MessageType, Message, MessageOption, ChatState};
+
+export {Notebook, Section, Note, MessageType, Message, MessageOption, NoteMessage, Notebook_Object_Type};
