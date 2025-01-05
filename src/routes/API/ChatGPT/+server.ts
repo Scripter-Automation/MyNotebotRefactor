@@ -14,7 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const data = await request.json();
     const openai = new OpenAIService();
-    const firebase = FirebaseAdminService.getInstance();
+    const firebase = await FirebaseAdminService.getInstance();
     const rag = new QdrantService(firebase.get_uid());
     const embeding = await openai.generate_embeding(data.prompt);
 

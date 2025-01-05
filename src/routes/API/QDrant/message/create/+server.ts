@@ -3,7 +3,7 @@ import QdrantService from "$lib/qdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ request }) => {
-    const firebase = FirebsaeAdminService.getInstance();
+    const firebase = await FirebsaeAdminService.getInstance();
     const data = await request.json();
     const rag = new QdrantService(firebase.get_uid());
 

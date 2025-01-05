@@ -13,7 +13,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const token = event.cookies.get("token")
 
     if (email && token) {
-        const firebaseAdmin = FirebaseAdminService.getInstance(email);
+        const firebaseAdmin = await FirebaseAdminService.getInstance(email);
         const is_valid = await firebaseAdmin.validate_token(token);
         console.log("is_valid ", is_valid);
 
