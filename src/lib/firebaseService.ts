@@ -27,6 +27,7 @@ export default class FirebaseService{
                 measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID 
             })
         }else{
+            console.log("Initializing in production")
             this.app = initializeApp({
                 apiKey: process.env.FIREBASE_API_KEY,
                 authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -36,6 +37,7 @@ export default class FirebaseService{
                 appId: process.env.FIREBASE_APP_ID,
                 measurementId: process.env.FIREBASE_MEASUREMENT_ID 
             });
+            console.log("firebase service initialized")
         }
        }
         this.auth = getAuth(this.app);
