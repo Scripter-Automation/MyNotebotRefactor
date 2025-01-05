@@ -1,7 +1,7 @@
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({request, cookies})=>{
-    console.log("setting cookies")
+    
     const body = await request.json();
     cookies.set("email",body.email,{
         path:"/",
