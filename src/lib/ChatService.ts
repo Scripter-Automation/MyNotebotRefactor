@@ -59,8 +59,8 @@ export default class Chat{
                 section:this.sections.filter((section)=>section.title=="General")[0].id
             }
         }catch(error){
-            console.error(error)
             console.error("Error initializing chat")
+            setTimeout(this.init.bind(this),1000)
         }
     }
 
