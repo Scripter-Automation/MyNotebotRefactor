@@ -1,5 +1,51 @@
 <script lang="ts">
+    import type FirebaseService from "$lib/firebaseService";
+    import { redirect } from "@sveltejs/kit";
+    import { firebaseStore } from "../store";
+    
+
     let register:boolean = false;
+    let firebaseService:FirebaseService;
+
+    firebaseStore.subscribe((value)=>{
+        firebaseService = value;
+    })
+
+    async function login(){
+        const form = document.querySelector("form") as HTMLFormElement;
+        const email = form.email.value;
+        const password = form.password.value;
+        try{
+          await firebaseService.login(email, password);
+        }catch(err:any){
+            if(err["code"]?.includes("invalid-credential")){
+                console.error({email, error:true, message:"Invalid username or password"});
+            }else{
+              console.error(err)
+                console.error({email, error:true ,message:"Something went wrong contact support"})
+            }
+      }
+    }
+
+    async function register_fn(){
+        const form = document.querySelector("form") as HTMLFormElement;
+        const email = form.email.value;
+        const password = form.password.value;
+        try{
+          await firebaseService.register(email, password);
+          await fetch("/register",{
+            method:"POST"
+          })
+          
+        }catch(err:any){
+            if(err["code"]?.includes("email-already-in-use")){
+                console.error({email, error:true, message:"Email already in use"});
+            }else{
+                console.error({email, error:true ,message:"Something went wrong contact support"})
+            }
+        }
+
+    }
 
 </script>
 {#if !register}
@@ -10,7 +56,7 @@
     </div>
   
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form class="space-y-6" action="/Auth?/login" method="POST">
+      <form class="space-y-6" on:submit|preventDefault={login}>
         <div>
           <label for="email" class="block text-sm/6 font-medium text-gray-900">Correo Electronico</label>
           <div class="mt-2">
@@ -49,7 +95,7 @@
         </div>
     
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form class="space-y-6" action="/Auth?/register" method="POST">
+        <form class="space-y-6" on:submit|preventDefault={register_fn} >
             <div>
             <label for="email" class="block text-sm/6 font-medium text-gray-900">Correo Electronico</label>
             <div class="mt-2">

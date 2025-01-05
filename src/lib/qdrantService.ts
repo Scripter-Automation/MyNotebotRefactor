@@ -18,7 +18,10 @@ export default class QdrantService{
     private client?:QdrantClient;
     private llm:OpenAIService;
 
-    constructor(user_id:string){
+    constructor(user_id?:string){
+        if(!user_id){
+            throw new Error("User id is required")
+        }
         this.init()
         this.user_id = user_id;
         this.llm = new OpenAIService();
