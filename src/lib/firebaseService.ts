@@ -2,7 +2,6 @@ import {getApps, initializeApp, type FirebaseApp} from "firebase/app"
 import {type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User} from "firebase/auth"
 import {serialize} from "cookie";
 import { goto } from "$app/navigation";
-import { config } from "dotenv";
 
 
 export default class FirebaseService{
@@ -29,7 +28,7 @@ export default class FirebaseService{
             })
         }else{
             console.log("Initializing in production")
-            config();
+            console.log(process.env.NODE_ENV)
             this.app = initializeApp({
                 apiKey: process.env.FIREBASE_API_KEY,
                 authDomain: process.env.FIREBASE_AUTH_DOMAIN,
