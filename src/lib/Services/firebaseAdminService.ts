@@ -4,10 +4,9 @@ import { config } from 'dotenv';
 export default class FirebaseAdminService {
     private app: App;
     private auth: Auth;
-    private user?: UserRecord;
     private static instance: FirebaseAdminService;
 
-    private constructor(email?: string) {
+    private constructor() {
         if (getApps().length != 0) {
             this.app = getApps()[0];
             this.auth = getAuth(this.app);
@@ -22,26 +21,24 @@ export default class FirebaseAdminService {
             });
             
             this.auth = getAuth(this.app);
-            if (!email) {
-                throw new Error("Email is required on initialization");
-            }
-            this.init(email);
+
         }
     }
 
-    public static async getInstance(email?: string): Promise<FirebaseAdminService> {
+    public static async getInstance(): Promise<FirebaseAdminService> {
         if (!FirebaseAdminService.instance) {
-            FirebaseAdminService.instance = new FirebaseAdminService(email);
+            FirebaseAdminService.instance = new FirebaseAdminService();
         }
         return FirebaseAdminService.instance;
     }
 
-    private async init(email: string) {
-        this.user = await this.auth.getUserByEmail(email);
-    }
 
-    public getUser(): UserRecord | undefined {
-        return this.user;
+
+    public async getUser(email?: string): Promise <UserRecord | undefined> {
+        if(!email){
+            return undefined;
+        }
+        return await this.auth.getUserByEmail(email);
     }
 
     public async validate_token(token:string):Promise<DecodedIdToken|null>{
@@ -51,11 +48,11 @@ export default class FirebaseAdminService {
         return await getAuth(this.app).verifyIdToken(token);
     }
 
-    public get_uid():string|undefined{
-        if(!this.user){
+    public get_uid(user?:UserRecord):string|undefined{
+        if(!user){
             return undefined;
         }
-        return this.user.uid;
+        return user.uid;
     }
     
 }

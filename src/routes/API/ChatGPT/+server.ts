@@ -1,7 +1,7 @@
-import FirebaseAdminService from "$lib/firebaseAdminService";
-import FirebaseService from "$lib/firebaseService";
-import OpenAIService from "$lib/OpenAIService";
-import QdrantService from "$lib/qdrantService";
+import FirebaseAdminService from "$lib/Services/firebaseAdminService";
+import FirebaseService from "$lib/Services/firebaseService";
+import OpenAIService from "$lib/Services/OpenAIService";
+import QdrantService from "$lib/Services/qdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
 
 type contextMessage = {
@@ -10,12 +10,12 @@ type contextMessage = {
     response:string
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 
     const data = await request.json();
     const openai = new OpenAIService();
     const firebase = await FirebaseAdminService.getInstance();
-    const rag = new QdrantService(firebase.get_uid());
+    const rag = new QdrantService(firebase.get_uid(await firebase.getUser(cookies.get("email"))));
     const embeding = await openai.generate_embeding(data.prompt);
 
     const query = await rag.get_context(data.context, data.public_context,embeding);

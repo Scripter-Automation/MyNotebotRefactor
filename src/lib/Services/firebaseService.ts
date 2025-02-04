@@ -11,7 +11,6 @@ export default class FirebaseService{
     
 
     constructor(){
-        console.log("here")
        if(getApps().length!=0){
         this.app= getApps()[0]
        }else{
@@ -73,6 +72,9 @@ export default class FirebaseService{
                         "Content-Type":"application/json"
                     }
                 })
+                await fetch("/register",{
+                    method:"POST"
+                  })
 
 
             },(error:Error)=>{throw new Error(error.message)})

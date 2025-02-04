@@ -16,6 +16,8 @@ interface Notebook {
     title: string;
     topic: string;
     description?: string;
+    children?: Section[];
+    tags?: string[];
     [key: string]: unknown; // Index signature
 }
 
@@ -26,6 +28,8 @@ interface Section {
     title: string;
     topic: string;
     description?: string;
+    children?: Note[];
+    tags: string[];
     [key: string]: unknown; // Index signature
 }
 
@@ -35,9 +39,24 @@ interface Note {
     notebookId: string;
     sectionId?: string;
     title: string;
+    topic: string;
     tags?: string[];
+    children: undefined;
     embeding?: number[];
     [key: string]: unknown; // Index signature
+}
+
+enum ContentType {
+    notebooks = "notebooks",
+    sections = "sections",
+    notes = "notes"
+}
+
+interface Context {
+    notebooks: Notebook[];
+    sections: Section[];
+    notes: Note[];
+    [key: ContentType]: Notebook[] | Section[] | Note[];
 }
 
 
@@ -53,10 +72,10 @@ interface NoteMessage {
 }
 
 enum Notebook_Object_Type {
-    Notebook = "notebook",
-    Section = "section",
-    Note = "note",
-    Message = "message"
+    Notebook = "notebooks",
+    Section = "sections",
+    Note = "notes",
+    Message = "messages"
 }
 
 enum MessageType {
@@ -76,4 +95,4 @@ interface Message {
 
 
 
-export {Notebook, Section, Note, MessageType, Message, MessageOption, NoteMessage, Notebook_Object_Type};
+export {Context, ContentType, Notebook, Section, Note, MessageType, Message, MessageOption, NoteMessage, Notebook_Object_Type};

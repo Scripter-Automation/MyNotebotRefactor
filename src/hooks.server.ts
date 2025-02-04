@@ -1,9 +1,10 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { parse } from 'cookie';
-import FirebaseAdminService from '$lib/firebaseAdminService';
+import FirebaseAdminService from '$lib/Services/firebaseAdminService';
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     
+    const firebaseAdmin = await FirebaseAdminService.getInstance();
     if(event.url.pathname === "/"){
         const response = await resolve(event);
         return response;
@@ -13,9 +14,8 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const token = event.cookies.get("token")
 
     if (email && token) {
-        const firebaseAdmin = await FirebaseAdminService.getInstance(email);
         const is_valid = await firebaseAdmin.validate_token(token);
-        console.log("is_valid ", is_valid);
+        //console.log("is_valid ", is_valid);
 
         if (!is_valid && (event.url.pathname.startsWith("/Private") || event.url.pathname.startsWith("/API"))) {
             throw redirect(303, "/")
@@ -28,7 +28,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
         }
     }
     
-    console.log("Passed");
+    console.log("Passed middleware");
     const response = await resolve(event);
     return response;
 

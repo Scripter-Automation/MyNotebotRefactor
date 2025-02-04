@@ -33,9 +33,6 @@
         const password = form.password.value;
         try{
           await firebaseService.register(email, password);
-          await fetch("/register",{
-            method:"POST"
-          })
           
         }catch(err:any){
             if(err["code"]?.includes("email-already-in-use")){

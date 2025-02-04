@@ -1,101 +1,75 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { Message } from "../../../app";
+    import type { ContentType, Context, Message, Note, Notebook, Section } from "../../../app";
     import MessageComponent from "$lib/UI/MessageComponent.svelte";
     import { BsMicFill } from "svelte-icons-pack/bs";
-    import Chat from "$lib/ChatService";
+    import Chat from "$lib/Services/ChatService";
     import { Icon } from "svelte-icons-pack";
     import { firebaseStore } from "../../../store";
-    import type FirebaseService from "$lib/firebaseService";
-    
+    import type FirebaseService from "$lib/Services/firebaseService";
+    import { LuNotebookPen, LuBrainCircuit } from "svelte-icons-pack/lu";
+    import { TrFillLayoutSidebarLeftCollapse, TrFillLayoutSidebarLeftExpand} from "svelte-icons-pack/tr";
+    import { BsSendFill } from "svelte-icons-pack/bs";
+    import SideBar from "$lib/UI/UserContentSidebar/SideBar.svelte";
+    import ContextPanel from "$lib/UI/Context/ContextPanel.svelte";
+    import NewItemDrawer from "$lib/UI/Drawers&Modules/ContentCreator/NewItemDrawer.svelte";
+    import { Toaster } from "$lib/components/ui/sonner";
+    import type { PageProps } from "./$types";
+
+
 
     let firebaseService:FirebaseService;
+    let drawer_toggle:boolean = false;
+    let drawer_context:string = ""
+
+    function toggle_drawer(){
+        drawer_toggle = !drawer_toggle;
+    }
+
+    function set_drawer_context(context:string){
+        drawer_context = context;
+    }
 
     firebaseStore.subscribe((value)=>{
         firebaseService = value;
     })
 
     async function logout(){
-        console.log("logging out")
         await firebaseService.logout();
     }
 
-    let context= {
-        notebook: "General",
-        section: "General",
-        note: "General"
-    }
+    export let data: PageProps;
+    let chat_service:Chat = data.chat_service;
+    let messages:Message[] = data.messages;
+    let read_this = data.read_this;
 
-    function update_context (new_context:{notebook:string, section:string, note:string}){
-        context = new_context
-    }
-
-    let messages:Message[] = [] 
     
     function update_messages(funcmessages:Message[]){
         messages = [...messages,...funcmessages]
-        console.log(funcmessages)
         if(!funcmessages[funcmessages.length-1].user_generated){
             read_this(funcmessages[funcmessages.length-1].text)
         }
     }
-    let chat_service:Chat;
 
-    function read_this(message:string){
-        // Verifica si el navegador soporta la API de SpeechSynthesis
-        if ('speechSynthesis' in window) {
-            // Función para convertir texto a voz
-            function textToSpeech(text:string) {
-                // Crea una instancia de SpeechSynthesisUtterance
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Opcional: Configura las propiedades de la voz
-                utterance.lang = 'es-ES'; // Idioma (español de España)
-                utterance.pitch = 2; // Tono
-                utterance.rate = 1; // Velocidad
-                utterance.volume = 1; // Volumen
-                
-                // Usa el SpeechSynthesis para hablar el texto
-                window.speechSynthesis.speak(utterance);
-            }
-
-            // Ejemplo de uso
-            textToSpeech(message);
-        } else {
-            console.log('La API de SpeechSynthesis no es soportada en este navegador.');
-        }
-
-        
-    }
+    chat_service.setUpdateFunction(update_messages);
 
 
 
-    onMount(()=>{
-      chat_service  = new Chat(messages, update_messages, update_context)
-      messages = chat_service.get_messages();
-      context = chat_service.get_context();
-    })
-
-    let speach_service;
-    let user_input = ""
+    let user_input = "";
     let listening = false
     let recognition:any;
     function listen(){
         if(!listening){
             listening = true;
             if ('webkitSpeechRecognition' in window) {
-                console.log("here")
                 recognition = new webkitSpeechRecognition();
                 recognition.continuous = true;
                 recognition.interimResults = true;
                 recognition.lang = 'es-ES'; // Set language to Spanish
-                console.log(1)
                 recognition.onresult = (event) => {
-                    console.log(2)
                     user_input = Array.from(event.results)
                         .map(result => result[0].transcript)
                         .join('');
-                    console.log(user_input)
                 };
                 recognition.onerror = (event) => {
                     console.error('Speech recognition error', event.error);
@@ -132,7 +106,39 @@
             }, 0); 
         }
     }
-    $: messages, scroll_to_bottom();
+
+    
+
+
+    let open = [false,false];
+
+
+    let chat_class =  "h-screen flex flex-col w-full"
+    $: {
+        if (open[0]) {
+            chat_class = "h-screen flex flex-col w-3/4";
+        } else {
+            chat_class = "h-screen flex flex-col w-full";
+        }
+    }
+
+    
+
+    let context = {notebooks:[], sections:[], notes:[]};
+
+    
+
+
+    function handle_drop(e:any){
+        const item:Notebook|Section|Note = JSON.parse(e.dataTransfer.getData("item"));
+        context[item.object_type] = [...context[item.object_type], item];
+    }
+    
+    function allowDrop(e:any) {
+        e.preventDefault();
+        //console.log(e);
+    }
+
 
 </script>
 <style>
@@ -140,30 +146,71 @@
         display: none;
     }
 </style>
-<main>
-    <div class="border-b shadow-lg p-4 flex justify-between">
-        <div>
-            <h1 class="text-2xl">Contexto Actual: {context.notebook}/{context.section}/{context.note}</h1>
-        </div>
-        <div>
-            <button on:click={logout} class="hidden md:block border-2 border-red-500 hover:bg-red-500 active:bg-red-700 p-2 rounded active:text-white hover:text-white">Cerrar Sesión</button>
-        </div>
-    </div>
-    <div id="chat_container" class="h-[75vh] flex flex-col overflow-y-scroll no-scrollbar" bind:this={chat_container}>
-        {#each messages as message}
-            <MessageComponent {message}></MessageComponent>
-        {/each}
-    </div>
+<div class="flex">
 
-    <div class="w-full flex justify-center p-5 border-t">
-        <div class="w-5/6 flex space-x-2 border  rounded p-5 shadow-lg">
-            <div class="w-9/12 md:w-11/12 relative">
-                <textarea on:keydown={handleKeyDown} id="UserInput" class="border rounded w-full h-full p-2" placeholder="¿De qué quieres hablar?" bind:value={user_input}></textarea>
-                <button on:click={listen} id="Listen" class={`hover:border p-2 ${listening ? "text-red-500" : "text-gray-500"} rounded absolute right-3 top-3`}><Icon src={BsMicFill}></Icon></button>
+    <SideBar 
+        {toggle_drawer}
+        {set_drawer_context} 
+        open={open[0]}
+        notebooks={chat_service?.notebooks}
+        section={chat_service?.sections}
+        notes={chat_service.notes}
+    />
+
+    <div class={chat_class}>
+        <div class="shadow-sm p-4 flex justify-between items-center">
+            <div>
+                <button onclick={()=>open[0] = !open[0]} class="p-2 hover:shadow-md hover:border rounded">
+                    {#if open[0]}
+                        <Icon className="text-xl" src={TrFillLayoutSidebarLeftExpand}></Icon>
+                    {:else}
+                        <Icon className="text-xl" src={TrFillLayoutSidebarLeftCollapse}></Icon>
+                    {/if}
+                </button>
             </div>
-            <div class="w-3/12 md:w-1/12">
-                <button on:click={ask} id="Enviar" class="bg-blue-500 p-2 w-full h-full text-white rounded">Enviar</button>
+            <div class="flex items-center space-x-2">
+                <button class="p-2 hover:shadow-md hover:border rounded">
+                    <Icon className="text-xl" src={LuNotebookPen} ></Icon>
+                </button>
+                <button class="p-2 hover:shadow-md hover:border rounded" onclick={()=>open[1] = !open[1]}>
+                    <Icon className="text-xl" src={LuBrainCircuit} ></Icon>
+                </button>
+                <button onclick={logout} class="hidden md:block border-2 border-red-500 hover:bg-red-500 active:bg-red-700 p-2 rounded active:text-white hover:text-white">Cerrar Sesión</button>
             </div>
         </div>
+        <div class="flex flex-grow" ondragover={allowDrop} ondrop={handle_drop} role="main">
+            <div class="flex grow">
+                <main class="flex flex-col grow">
+                    <!--This is the element that should take the entire space-->
+                    <div id="chat_container" class="h-full flex flex-col overflow-y-scroll no-scrollbar grow" bind:this={chat_container}>
+                        {#each messages as message}
+                            <MessageComponent {message}></MessageComponent>
+                        {/each}
+                    </div>
+                    <!--This is the chatbox that should go at the bottom of the page-->
+                    <div class="w-full pb-5 flex justify-center">
+                        <div class="w-5/6 space-x-2 border bg-gray-200 rounded-3xl p-5 shadow-lg">
+                            <div class="w-full md:w-full relative">
+                                <textarea onkeydown={handleKeyDown} id="UserInput" class="focus:outline-none focus:ring-0 focus:border-transparent bg-gray-200 border rounded w-full h-full p-2" placeholder="¿De qué quieres hablar?" bind:value={user_input}></textarea>
+                            </div>
+                            <div class="w-full flex justify-end">
+                                <button onclick={user_input != "" ? ask : listen} id="Enviar" class="flex items-center justify-center bg-black p-2 hover:opacity-70 text-white rounded-full"><Icon src={user_input != "" ? BsSendFill : BsMicFill}></Icon></button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            
+                <ContextPanel {context} open={open[1]}></ContextPanel>
+            
+        </div>
     </div>
-</main>
+</div>
+
+<NewItemDrawer 
+    {drawer_toggle}
+    {drawer_context}
+    {toggle_drawer}
+/>
+
+<Toaster/>

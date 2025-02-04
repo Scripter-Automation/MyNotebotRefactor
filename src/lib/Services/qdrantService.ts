@@ -1,13 +1,13 @@
 import {QdrantClient} from '@qdrant/js-client-rest'
 import { config } from 'dotenv';
-import type {  Note, Notebook, NoteMessage, Section } from '../app';
+import type {  Note, Notebook, NoteMessage, Section } from '../../app';
 import OpenAIService from './OpenAIService';
 
 enum Notebook_Object_Type {
-    Notebook = "notebook",
-    Section = "section",
-    Note = "note",
-    Message = "message"
+    Notebook = "notebooks",
+    Section = "sections",
+    Note = "notes",
+    Message = "messages"
 }
 
 
@@ -36,7 +36,6 @@ export default class QdrantService{
 
         try{
             const result = await this.client.getCollections();
-            console.log(result);
         }catch(error){
             console.log(error);
         }
@@ -47,7 +46,6 @@ export default class QdrantService{
      * in his own cluster so that it wont get mixed with other user's data
      */
     public async createCustomerCollection(){
-        console.log("creating collection")
         if(this.check_client()){
             await this.client?.createCollection(this.user_id,{
                 vectors:{
@@ -136,7 +134,7 @@ export default class QdrantService{
         }
     }
 
-    public async get_all_sections(notebook_id:string):Promise<Section[]>{ 
+    public async get_all_sections():Promise<Section[]>{ 
         if(this.check_client()){
             const result = await this.client?.scroll(this.user_id,{
                filter:{
@@ -144,15 +142,9 @@ export default class QdrantService{
                     {
                         key:"object_type",
                         match:{
-                            value:"section"
+                            value:Notebook_Object_Type.Section
                         }
                     },
-                    {
-                        key:"notebookId",
-                        match:{
-                            value:notebook_id
-                        }
-                    }
                 ]
                },
             });
@@ -166,41 +158,25 @@ export default class QdrantService{
     }
 
 
-    public async get_all_notes(notebook_id:string, section_id?:string):Promise<Note[]>{
-        console.log("Querying notes", notebook_id, section_id, this.user_id)
+    public async get_all_notes():Promise<Note[]>{
         const filter = {
             must:[
                 {
                     key:"object_type",
                     match:{
-                        value:"note"
+                        value:Notebook_Object_Type.Note
                     }
                 },
-                {
-                    key:"notebookId",
-                    match:{
-                        value:notebook_id
-                    }
-                }
+
             ]
            }
 
-        if(section_id){
-            filter.must.push({
-                key:"sectionId",
-                match:{
-                    value:section_id
-                }
-            })
-        }
 
         if(this.check_client()){
-            console.log(filter)
             try{
                 const result = await this.client?.scroll(this.user_id,{
                     filter:filter
                     });
-                console.log("results", result)
                 return result?.points.map((point)=>{
                     return point.payload as Note;
                 }) ?? [];
@@ -215,10 +191,10 @@ export default class QdrantService{
     }
 
     public async create_note(id:string, notebook_id:string, section_id:string, title:string){
-        console.log(notebook_id, section_id)
+
         const note = {
             id:id,
-            object_type:"note",
+            object_type:"notes",
             notebookId:notebook_id,
             sectionId:section_id,
             title:title,
@@ -292,25 +268,28 @@ export default class QdrantService{
      * Gets all the notebooks that the user has created
      * @returns {Notebook[]} An array of notebooks
      */
-    public async get_notebooks():Promise<Notebook[]>{
+    public async get_all_notebooks():Promise<Notebook[]>{
         if(this.check_client()){
+            console.log("getting notebooks top")
             const result = await this.client?.scroll(this.user_id,{
                filter:{
                 must:[
                     {
                         key:"object_type",
                         match:{
-                            value:"notebook"
+                            value:Notebook_Object_Type.Notebook
                         }
                     }
                 ]
                },
             });
-
+            console.log("getting notebooks")
+            console.log("notebooks", result)
             return result?.points.map((point)=>{
                 return point.payload as Notebook;
             }) ?? [];
         }else{
+            console.log("here")
             throw new Error("Client not initialized")
         }
     }
@@ -322,7 +301,7 @@ export default class QdrantService{
                 {
                     key:"object_type",
                     match:{
-                        value:"message"
+                        value:"messages"
                     }
                 },
             ]
@@ -354,7 +333,7 @@ export default class QdrantService{
                 }
             })
         }
-        console.log(filter)
+
         return await this.client?.query(this.user_id,{
             query:prompt,
             filter:filter,
