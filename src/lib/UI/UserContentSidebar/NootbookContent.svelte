@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { Notebook, Section, Note } from "../../../app";
+    import type { NotebookInstance, SectionInstance, NoteInstance } from "../../../app";
     import NotebookContent from "./NootbookContent.svelte";
     import { Notebook as NoteIcon,  Bookmark, StickyNote  }  from 'lucide-svelte';
 
-    export let content:Notebook[]|Section[]|Note[];
+    export let content:NotebookInstance[]|SectionInstance[]|NoteInstance[];
     export let level;
 
     let open:boolean[] = [];
@@ -14,7 +14,7 @@
         })
     })
 
-    function handleDrag(e:any, item:Notebook|Section|Note){
+    function handleDrag(e:any, item:NotebookInstance|SectionInstance|NoteInstance){
         e.dataTransfer.setData("item",JSON.stringify(item));
     }
 

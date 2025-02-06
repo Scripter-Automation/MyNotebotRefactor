@@ -1,5 +1,5 @@
 
-import type { Message, Note,  Notebook, Section } from "../../app";
+import type { Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../app";
 import {v4 as uuidv4} from 'uuid';
 import StorageService, { TimeFrame } from "./storage.service";
 
@@ -34,9 +34,9 @@ export default class Chat{
     }
 
 
-    public notebooks:Notebook[]=[];
-    public sections:{[key: string]: Section[]} = {};
-    public notes:{[key:string]:Note[]} = {};
+    public notebooks:NotebookInstance[]=[];
+    public sections:{[key: string]: SectionInstance[]} = {};
+    public notes:{[key:string]:NoteInstance[]} = {};
     public recorded_messages:{[key:string]:Message[]} = {};
     private action?:(...params:any[])=>void;
     private update_function:(messages:Message[])=>void;
@@ -91,10 +91,10 @@ export default class Chat{
     public async initialize_notes(){
         const notes = this.storage_service.get("notes");
         if(notes != null){
-            this.notes = notes.notes as {[key:string]:Note[]};
+            this.notes = notes.notes as {[key:string]:NoteInstance[]};
         }else{
             const notesMap = await this.get_all_notes();
-            this.notes = Object.fromEntries(notesMap) as { [key: string]: Note[] };
+            this.notes = Object.fromEntries(notesMap) as { [key: string]: NoteInstance[] };
             this.storage_service.store("notes",{
                 notes:this.notes,
                 expiration: this.storage_service.createExpiration(TimeFrame.Day,1)
@@ -105,10 +105,10 @@ export default class Chat{
     public async initialize_sections(){
         const sections = this.storage_service.get("sections");
         if(sections != null){
-            this.sections = sections.sections as {[key:string]:Section[]};
+            this.sections = sections.sections as {[key:string]:SectionInstance[]};
         }else{
             const sectionsMap = await this.get_all_sections(this.context?.notebook as string);
-            this.sections = Object.fromEntries(sectionsMap) as { [key: string]: Section[] };
+            this.sections = Object.fromEntries(sectionsMap) as { [key: string]: SectionInstance[] };
            
             this.storage_service.store("sections",{
                 sections:this.sections,
@@ -121,7 +121,7 @@ export default class Chat{
     public async initialize_notebooks(){
         const notebooks = this.storage_service.get("notebooks");
         if(notebooks != null){
-            this.notebooks = notebooks.notebooks as Notebook[];
+            this.notebooks = notebooks.notebooks as NotebookInstance[];
         }else{
             this.notebooks = await this.get_all_notebooks();
             this.storage_service.store("notebooks",{

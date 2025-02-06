@@ -59,9 +59,7 @@ export const load: PageLoad = async ({ fetch }) => {
     messages = chat_service.get_messages();
     context = chat_service.get_context();
 
-    console.log("On load", chat_service.get_notebooks());
-    console.log("On load", chat_service.get_sections());
-    console.log("On load", chat_service.get_notes());
+
     
     return {
         chat_service,

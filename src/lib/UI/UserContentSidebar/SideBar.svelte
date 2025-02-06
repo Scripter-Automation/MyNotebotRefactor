@@ -1,32 +1,15 @@
 <script lang="ts">
-    import type { Note, Notebook, Section } from "../../../app";
+    import type { NotebookInstance } from "../../../app";
     import NootbookContent from "./NootbookContent.svelte";
     import * as DropDownMenu from "$lib/components/ui/dropdown-menu"; 
     import { Ellipsis } from 'lucide-svelte';
 
     export let open:boolean;
     let sidebarClass = "hidden border-r bg-gray-100 overflow-hidden"
-    export let notebooks:Notebook[] = [];
-    export let section:{[key:string]:Section[]} = {};
-    export let notes:{[key:string]:Note[]} = {};
+
     export let toggle_drawer:()=>void;
     export let set_drawer_context:(context:string)=>void;
-
-
-
-    const content:Notebook[] = [];
-
-    notebooks.forEach((note)=>{
-        if(!section[note.id]){
-            section[note.id] = [];
-        }
-        section[note.id].forEach((item)=>{
-            item.children = notes[item.id];
-        })
-        note.children = section[note.id];
-        content.push(note);
-    })
-    
+    export let content: NotebookInstance[]
 
 
 
@@ -51,11 +34,18 @@
 
             <DropDownMenu.Item on:click={()=>{
                 toggle_drawer();
-                set_drawer_context("notebook");
+                set_drawer_context("notebooks");
             }}>Crear Cuaderno</DropDownMenu.Item>            
             
-            <DropDownMenu.Item>Crear Seccion</DropDownMenu.Item>
-            <DropDownMenu.Item>Crear Nota</DropDownMenu.Item>
+            <DropDownMenu.Item on:click={()=>{
+                toggle_drawer();
+                set_drawer_context("sections")
+            }}>Crear Seccion</DropDownMenu.Item>
+            <DropDownMenu.Item on:click={()=>{
+                toggle_drawer();
+                set_drawer_context("notes");
+            }}
+            >Crear Nota</DropDownMenu.Item>
 
 
         </DropDownMenu.Content>

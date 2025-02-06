@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { ContentType, Context, Message, Note, Notebook, Section } from "../../../app";
+    import type { ContentType, Context, Message, Note, Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
     import MessageComponent from "$lib/UI/MessageComponent.svelte";
     import { BsMicFill } from "svelte-icons-pack/bs";
     import Chat from "$lib/Services/ChatService";
@@ -124,7 +124,8 @@
 
     
 
-    let context = {notebooks:[], sections:[], notes:[]};
+    let context:Context = {notebooks:[], sections:[], notes:[]};
+
 
     
 
@@ -133,10 +134,39 @@
         const item:Notebook|Section|Note = JSON.parse(e.dataTransfer.getData("item"));
         context[item.object_type] = [...context[item.object_type], item];
     }
+
+
     
     function allowDrop(e:any) {
         e.preventDefault();
         //console.log(e);
+    }
+
+    let content:NotebookInstance[] = [];
+
+    let notebooks:NotebookInstance[] = chat_service?.notebooks;
+    let section:{[key:string]:SectionInstance[]} = chat_service?.sections;
+    let notes:{[key:string]:NoteInstance[]} = chat_service.notes;
+
+    notebooks.forEach((note)=>{
+        if(!section[note.id]){
+            section[note.id] = [];
+        }
+        section[note.id].forEach((item)=>{
+            if(notes[item.id] == undefined){
+                item.children = []
+            }else{
+                item.children = notes[item.id];
+            }
+
+        })
+
+        note.children = section[note.id];
+        content.push(note);
+    })
+
+    function update_content(new_content:NotebookInstance[]){
+        content = new_content;
     }
 
 
@@ -152,9 +182,7 @@
         {toggle_drawer}
         {set_drawer_context} 
         open={open[0]}
-        notebooks={chat_service?.notebooks}
-        section={chat_service?.sections}
-        notes={chat_service.notes}
+        {content}
     />
 
     <div class={chat_class}>
@@ -211,6 +239,8 @@
     {drawer_toggle}
     {drawer_context}
     {toggle_drawer}
+    {content}
+    {update_content}
 />
 
 <Toaster/>

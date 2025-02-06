@@ -1,7 +1,40 @@
-import type APIService from "./APIService";
+import type { NotebookBuilder, NotebookInstance } from "../../../app";
+import type { Item } from "../storage.service";
+import APIService from "./APIService";
 
-export default class NotebookEndpoint implements APIService {
+export default class NotebookEndpoint extends APIService {
     endpoint: string = "/API/QDrant/notebook";
+
+    constructor(){
+        super();        
+    }
+
+    async create(params: NotebookBuilder): Promise<{success:boolean,message:string, object?:NotebookInstance}> {
+        try{
+            params = {...params, id:this.generate_UID() ,object_type:"notebooks", children:[]}
+            await fetch(this.endpoint + "/create", {
+                method: "POST",
+                body: JSON.stringify(params)
+            });
+            const update = this.updateStorage(params as NotebookInstance);
+            if(!update.success) return update;
+
+            return {success:true, message:"Cuaderno creado exitosamente", object:params as NotebookInstance}
+        }catch(error){
+            console.error(error);
+            return {success:false, message:"Error al crear el cuaderno, si el error continua favor de contactar a soporte"}
+        }
+        
+    }
+
+    updateStorage(params:NotebookInstance): {success:boolean,message:string} {
+        const current_notebooks = this.storageService.get("notebooks") as Item;
+        if(!current_notebooks) return {success:false, message:"No se encontraron cuadernos, si este error persiste contactar a soporte"};
+        current_notebooks.notebooks.push(params)
+        this.storageService.store("notebooks", current_notebooks)
+        return {success:true, message:"Cuaderno actualizado exitosamente"}
+    }
+
     get(params?: any): Promise<any> {
         throw new Error("Method not implemented.");
     }
@@ -14,18 +47,6 @@ export default class NotebookEndpoint implements APIService {
     delete(params?: any): Promise<any> {
         throw new Error("Method not implemented.");
     }
-    async create(params: { id: string, title: string, topic: string, description?: string, tags?: string }): Promise<{success:boolean,message:string}> {
-        try{
-            await fetch(this.endpoint + "/create", {
-                method: "POST",
-                body: JSON.stringify(params)
-            });
-            return {success:true, message:"Cuaderno creado exitosamente"}
-        }catch(error){
-            console.error(error);
-            return {success:false, message:"Error al crear el cuaderno, si el error continua favor de contactar a soporte"}
-        }
-        
-    }
+
 
 }

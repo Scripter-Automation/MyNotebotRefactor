@@ -1,6 +1,6 @@
 import {QdrantClient} from '@qdrant/js-client-rest'
 import { config } from 'dotenv';
-import type {  Note, Notebook, NoteMessage, Section } from '../../app';
+import type {  Note, Notebook, NotebookCreator, NotebookInstance, NoteCreator, NoteInstance, NoteMessage, Section, SectionBuilder, SectionCreator, SectionInstance } from '../../app';
 import OpenAIService from './OpenAIService';
 
 enum Notebook_Object_Type {
@@ -66,7 +66,7 @@ export default class QdrantService{
      * @param description The description of the notebook
      */
     public async create_notebook(id:string, title:string, topic:string, description:string){
-        const notebook:Notebook = {
+        const notebook:NotebookCreator = {
             id:id,
             object_type:Notebook_Object_Type.Notebook,
             title:title,
@@ -103,13 +103,13 @@ export default class QdrantService{
      * @param description The description of the section
      */
     public async create_section(id:string, notebook_id:string, title:string, topic:string, description:string){
-        const section:Section = {
+        const section:SectionCreator = {
             id:id,
             object_type:Notebook_Object_Type.Section,
             topic:topic,
             notebookId:notebook_id,
             title:title,
-            description:description
+            description:description,
         }
         const vector = await this.llm.generate_embeding(JSON.stringify(section));
         
@@ -198,7 +198,7 @@ export default class QdrantService{
             notebookId:notebook_id,
             sectionId:section_id,
             title:title,
-        } as Note;
+        } as NoteCreator;
         const vector = await this.llm.generate_embeding(JSON.stringify(note));
         if(this.check_client()){
             try{
@@ -270,7 +270,7 @@ export default class QdrantService{
      */
     public async get_all_notebooks():Promise<Notebook[]>{
         if(this.check_client()){
-            console.log("getting notebooks top")
+
             const result = await this.client?.scroll(this.user_id,{
                filter:{
                 must:[
@@ -283,13 +283,10 @@ export default class QdrantService{
                 ]
                },
             });
-            console.log("getting notebooks")
-            console.log("notebooks", result)
             return result?.points.map((point)=>{
                 return point.payload as Notebook;
             }) ?? [];
         }else{
-            console.log("here")
             throw new Error("Client not initialized")
         }
     }

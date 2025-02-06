@@ -11,40 +11,77 @@ declare global {
 }
 
 interface Notebook {
-    id: string;
-    object_type: string;
+    object_type: string = "notebooks";
     title: string;
     topic: string;
     description?: string;
-    children?: Section[];
     tags?: string[];
     [key: string]: unknown; // Index signature
 }
 
-interface Section {
+interface NotebookBuilder extends Notebook {
+    id?:string;
+}
+
+interface NotebookCreator extends Notebook {
+    id:string;
+}
+
+
+interface NotebookInstance extends Notebook {
     id: string;
-    object_type: string;
+    children: SectionInstance[];
+}
+
+
+interface Section {
+    object_type: string = "sections";
     notebookId: string;
     title: string;
     topic: string;
     description?: string;
-    children?: Note[];
-    tags: string[];
+    tags?: string[];
     [key: string]: unknown; // Index signature
+}
+
+interface SectionBuilder extends Section {
+    id?:string;
+
+}
+
+interface SectionCreator extends Section {
+    id:string;
+}
+
+interface SectionInstance extends Section {
+    id: string;
+    children: NoteInstance[];
 }
 
 interface Note {
-    id: string;
-    object_type: string;
+    object_type: string = "notes";
     notebookId: string;
-    sectionId?: string;
+    sectionId: string;
     title: string;
     topic: string;
     tags?: string[];
-    children: undefined;
-    embeding?: number[];
     [key: string]: unknown; // Index signature
 }
+
+interface NoteBuilder extends Note {
+    id?:string;
+}
+
+interface NoteCreator extends Note {
+    id:string;
+}
+
+interface NoteInstance extends Note {
+    id: string;
+    children: undefined;
+    embeding?: number[];
+}
+
 
 enum ContentType {
     notebooks = "notebooks",
@@ -53,10 +90,10 @@ enum ContentType {
 }
 
 interface Context {
-    notebooks: Notebook[];
-    sections: Section[];
-    notes: Note[];
-    [key: ContentType]: Notebook[] | Section[] | Note[];
+    notebooks: NotebookInstance[];
+    sections: SectionInstance[];
+    notes: NoteInstance[];
+    [key: ContentType]: NotebookInstance[] | SectionInstance[] | NoteInstance[];
 }
 
 
@@ -95,4 +132,4 @@ interface Message {
 
 
 
-export {Context, ContentType, Notebook, Section, Note, MessageType, Message, MessageOption, NoteMessage, Notebook_Object_Type};
+export {Context, ContentType, Notebook, NotebookCreator, NotebookBuilder, NotebookInstance, Section, SectionCreator, SectionBuilder, SectionInstance, Note, NoteCreator, NoteInstance, NoteBuilder, MessageType, Message, MessageOption, NoteMessage, Notebook_Object_Type};

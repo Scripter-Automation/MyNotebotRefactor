@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { Notebook, Section, Note, ContentType } from "../../../app";
+    import type { NotebookInstance, ContentType, SectionInstance, NoteInstance } from "../../../app";
     import ContextContent from "./ContextContent.svelte";
     import * as ContextMenu from "$lib/components/ui/context-menu/index.js";
-    export let context:Notebook[]|Section[]|Note[];
+    export let context:NotebookInstance[]|SectionInstance[]|NoteInstance[];
     export let level:number;
     export let key:ContentType|undefined;
     

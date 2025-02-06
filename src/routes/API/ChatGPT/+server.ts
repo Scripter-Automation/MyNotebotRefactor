@@ -53,7 +53,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
                 * No menciones que estas siendo utilizado en conjunto con una herramienta para hacer RAG.
                 * Contesta a lo que pregunto el usuario la etiqueta user_prompt
                 * Si no tienes contexto, no digas que no tienes informacion sobre el tema, contesta de manera natural
-                * 
             </rules>
         </context>
     `

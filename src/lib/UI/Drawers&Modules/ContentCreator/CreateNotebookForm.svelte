@@ -5,24 +5,29 @@
     import {Textarea} from "$lib/components/ui/textarea"
     import NotebookEndpoint from "$lib/Services/API/NotebookEndpoing";
     import { toast } from "svelte-sonner";
-    import {v4 as uuidv4} from 'uuid';
+    
+    import type {  Notebook, NotebookBuilder, NotebookInstance } from "../../../../app";
+    
 
     export let toggle_drawer:()=>void;
+    export let content:Notebook[];
+    export let update_content:(new_content:Notebook[]) =>void;
 
     async function handle_submit(event: SubmitEvent) {
-        event.preventDefault();
         const form = event.target as HTMLFormElement;
         const data = new FormData(form);
-        const formDataObject = Object.fromEntries(data.entries()) as { id: string; title: string; topic: string; description?: string; tags?: string };
-        formDataObject.id = uuidv4();
-        console.log(formDataObject);
+        const formDataObject = Object.fromEntries(data.entries()) as NotebookBuilder;
+
 
         const res = await new NotebookEndpoint().create(formDataObject) 
 
         if(res.success){
-            toast("request successfull");
+            content.push(res.object as NotebookInstance);
+            update_content(content);
+            toast(res.message);
+
         }else{
-            toast("request failed")
+            toast(res.message);
         }
 
         toggle_drawer();
