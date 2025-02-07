@@ -93,7 +93,7 @@ export default class StorageService {
     }
   }
 
-  public DeleteAll(){
+  public static DeleteAll(){
     localStorage.clear();
   }
 }

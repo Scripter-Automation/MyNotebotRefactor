@@ -1,6 +1,5 @@
 <script lang="ts">
-    import type FirebaseService from "$lib/firebaseService";
-    import { redirect } from "@sveltejs/kit";
+    import type FirebaseService from "$lib/Services/firebaseService";
     import { firebaseStore } from "../store";
     
 

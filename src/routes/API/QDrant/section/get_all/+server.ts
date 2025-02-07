@@ -17,7 +17,6 @@ export const POST : RequestHandler = async ({ request,cookies }) => {
             res.get(item.notebookId).push(item);
         })
         res = Array.from(res);
-        console.log(res);
     } catch (error) {
         console.error(error);
         return new Response(null, {

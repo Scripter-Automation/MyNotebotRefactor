@@ -14,12 +14,23 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
     const token = event.cookies.get("token")
 
     if (email && token) {
-        const is_valid = await firebaseAdmin.validate_token(token);
-        //console.log("is_valid ", is_valid);
-
-        if (!is_valid && (event.url.pathname.startsWith("/Private") || event.url.pathname.startsWith("/API"))) {
+        
+        const idToken = await firebaseAdmin.verifySessionCookie(token);
+        console.log(idToken);
+        //console.log(idToken.exp*1000 > Date.now())
+        //console.log(new Date(idToken.exp*1000).toUTCString())
+        if ( idToken.exp*1000 < Date.now() && (event.url.pathname.startsWith("/Private") || event.url.pathname.startsWith("/API"))) {
+            console.log("Access denied due to expired token")
+            event.cookies.delete("email",{path:"/"});
+            event.cookies.delete("token", {path:"/"});
             throw redirect(303, "/")
             
+        }
+
+        if(event.url.pathname.startsWith("/API/cookies/delete_user_cookies")){
+            console.log("revokeing session")
+            firebaseAdmin.revokeSession(idToken.uid);
+            console.log("session revoked")
         }
     } else {
         console.log("Missing email or token in cookies");

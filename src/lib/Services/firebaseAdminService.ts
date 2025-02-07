@@ -45,7 +45,7 @@ export default class FirebaseAdminService {
         if(!token){
             return null;
         }
-        return await getAuth(this.app).verifyIdToken(token);
+        return await this.auth.verifyIdToken(token);
     }
 
     public get_uid(user?:UserRecord):string|undefined{
@@ -53,6 +53,18 @@ export default class FirebaseAdminService {
             return undefined;
         }
         return user.uid;
+    }
+
+    public async create_session_cookie(id_token:string):Promise<string>{
+        return await this.auth.createSessionCookie(id_token,{expiresIn:60*60*24*1000});
+    }
+
+    public async verifySessionCookie(session_cookie:string):Promise<DecodedIdToken>{
+        return await this.auth.verifySessionCookie(session_cookie);
+    }
+
+    public async revokeSession(uid:string){
+        await this.auth.revokeRefreshTokens(uid);
     }
     
 }

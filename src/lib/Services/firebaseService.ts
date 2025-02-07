@@ -2,6 +2,8 @@ import {getApps, initializeApp, type FirebaseApp} from "firebase/app"
 import {type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User} from "firebase/auth"
 import {serialize} from "cookie";
 import { goto } from "$app/navigation";
+import type { Persistence } from "firebase/auth";
+import StorageService from "./storage.service";
 
 
 export default class FirebaseService{
@@ -34,21 +36,18 @@ export default class FirebaseService{
 
     public async login(email:string,password:string):Promise<void>{
         try{
-            await signInWithEmailAndPassword(this.auth,email,password);
-            onAuthStateChanged(this.auth,async (user:User|null)=>{
-                const token = await user?.getIdToken() as string;
-                await fetch("/set_cookies",{
-                    method:"POST",
-                    body:JSON.stringify({
-                        email:email,
-                        token:token
-                    }),
-                    headers:{
-                        "Content-Type":"application/json"
-                    }
-                })
-
-            },(error:Error)=>{throw new Error(error.message)})
+            const user = await signInWithEmailAndPassword(this.auth,email,password);
+            const token = await user.user.getIdToken() as string;
+            await fetch("/set_cookies",{
+                method:"POST",
+                body:JSON.stringify({
+                    email:email,
+                    token:token
+                }),
+                headers:{
+                    "Content-Type":"application/json"
+                }
+            })
             goto("/Private/Chat")
         }catch(err){
             throw err
@@ -59,25 +58,21 @@ export default class FirebaseService{
 
     public async register(email:string,password:string):Promise<void>{
         try{
-            await createUserWithEmailAndPassword(this.auth,email,password);
-            onAuthStateChanged(this.auth,async (user:User|null)=>{
-                const token = await user?.getIdToken() as string;
-                await fetch("/set_cookies",{
-                    method:"POST",
-                    body:JSON.stringify({
-                        email:email as string,
-                        token:token
-                    }),
-                    headers:{
-                        "Content-Type":"application/json"
-                    }
-                })
-                await fetch("/register",{
-                    method:"POST"
-                  })
-
-
-            },(error:Error)=>{throw new Error(error.message)})
+            const user = await createUserWithEmailAndPassword(this.auth,email,password);
+            const token = await user.user.getIdToken();
+            await fetch("/set_cookies",{
+                method:"POST",
+                body:JSON.stringify({
+                    email:email as string,
+                    token:token
+                }),
+                headers:{
+                    "Content-Type":"application/json"
+                }
+            })
+            await fetch("/register",{
+                method:"POST"
+              })
             goto("/Private/Chat")
         }catch(err){
             throw err
@@ -89,6 +84,7 @@ export default class FirebaseService{
         await fetch("/API/cookies/delete_user_cookies",{
             method:"POST"
         })
+        StorageService.DeleteAll();
         goto("/")
     }
 

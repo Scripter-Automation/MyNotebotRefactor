@@ -4,6 +4,7 @@ import type { Message } from "../../../app";
 
 export const load: PageLoad = async ({ fetch }) => {
     
+    
     function read_this(message:string){
         // Verifica si el navegador soporta la API de SpeechSynthesis
         if ('speechSynthesis' in window) {
@@ -31,7 +32,7 @@ export const load: PageLoad = async ({ fetch }) => {
         
     }
     
-    
+
     function update_context (new_context:{notebook:string, section:string, note:string}){
         context = new_context
     }
@@ -44,6 +45,7 @@ export const load: PageLoad = async ({ fetch }) => {
             read_this(funcmessages[funcmessages.length-1].text)
         }
     }
+
     
     //Posiblemente este context quede remplazado y no se ocupe
     let context= {
@@ -52,12 +54,19 @@ export const load: PageLoad = async ({ fetch }) => {
         note: "General"
     }
 
+
+    /**
+     * Este apartado de aqui ocasiona que se ejecuten 3 veces el webhook que verifica al usuario. Esto podria ser reducido a uno y 
+     * probablemente ocasionaria que la pagina cargara mas rapido
+     */
     const chat_service = new Chat(messages, update_messages, update_context, fetch);  
     await chat_service.initialize_notebooks();
     await chat_service.initialize_sections();
     await chat_service.initialize_notes();
+
     messages = chat_service.get_messages();
     context = chat_service.get_context();
+
 
 
     
