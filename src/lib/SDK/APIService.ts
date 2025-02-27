@@ -1,4 +1,4 @@
-import StorageService from "../storage.service";
+import StorageService from "../Services/Client/StorageService";
 import {v4 as uuidv4} from 'uuid';
 /**
  * A class meant to get the distinct API endpoints and make them accessable in the

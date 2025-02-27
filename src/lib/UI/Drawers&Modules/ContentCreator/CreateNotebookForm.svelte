@@ -3,15 +3,15 @@
     import {Input} from "$lib/components/ui/input";
     import {Label} from "$lib/components/ui/label";
     import {Textarea} from "$lib/components/ui/textarea"
-    import NotebookEndpoint from "$lib/Services/API/NotebookEndpoing";
+    import NotebookEndpoint from "$lib/SDK/VectorDB/NotebookEndpoing";
     import { toast } from "svelte-sonner";
     
     import type {  Notebook, NotebookBuilder, NotebookInstance } from "../../../../app";
     
 
     export let toggle_drawer:()=>void;
-    export let content:Notebook[];
-    export let update_content:(new_content:Notebook[]) =>void;
+    export let content:NotebookInstance[];
+    export let update_content:(new_content:NotebookInstance[]) =>void;
 
     async function handle_submit(event: SubmitEvent) {
         const form = event.target as HTMLFormElement;

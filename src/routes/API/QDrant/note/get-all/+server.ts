@@ -1,10 +1,9 @@
-import FirebsaeAdminService from "$lib/Services/firebaseAdminService";
-import QdrantService from "$lib/Services/qdrantService";
+import FirebsaeAdminService from "$lib/Services/Server/FirebaseAdminService";
+import QdrantService from "$lib/Services/Server/QdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
 
 
-export const POST:RequestHandler = async ({ request, cookies }) => {
-    const data = await request.json();
+export const POST:RequestHandler = async ({ cookies }) => {
     const firebase = await FirebsaeAdminService.getInstance();
     const rag = new QdrantService(firebase.get_uid(await firebase.getUser(cookies.get("email"))));
     let notes;

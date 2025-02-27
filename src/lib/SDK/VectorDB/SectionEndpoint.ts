@@ -1,10 +1,10 @@
 import type { Section, SectionBuilder, SectionInstance } from "../../../app";
-import type { Item } from "../storage.service";
-import APIService from "./APIService";
+import type { Item } from "../../Services/Client/StorageService";
+import APIService from "../APIService";
 
 
 export default class SectionEndpoint extends APIService {
-    endpoint: string = "/API/QDrant/section";
+    endpoint: string = "/api/qdrant/section";
 
     constructor(){
         super();        

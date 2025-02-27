@@ -1,7 +1,7 @@
 
-import type { Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../app";
+import type { Context, Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
 import {v4 as uuidv4} from 'uuid';
-import StorageService, { TimeFrame } from "./storage.service";
+import StorageService, { TimeFrame } from "./StorageService";
 
 
 export enum ChatState{
@@ -21,17 +21,6 @@ export default class Chat{
     private storage_service = new StorageService();
 
 
-    // Depricate context and public_context
-    private context?:{
-        notebook?:string,
-        section?:string,
-        note?:string
-    }
-    private public_context = {
-        notebook:"General",
-        section:"General",
-        note:"General"
-    }
 
 
     public notebooks:NotebookInstance[]=[];
@@ -66,10 +55,6 @@ export default class Chat{
 
     public get_messages(){
         return this.messages;
-    }
-
-    public get_context(){
-        return this.public_context;
     }
 
     public get_notebooks(){
@@ -107,7 +92,7 @@ export default class Chat{
         if(sections != null){
             this.sections = sections.sections as {[key:string]:SectionInstance[]};
         }else{
-            const sectionsMap = await this.get_all_sections(this.context?.notebook as string);
+            const sectionsMap = await this.get_all_sections();
             this.sections = Object.fromEntries(sectionsMap) as { [key: string]: SectionInstance[] };
            
             this.storage_service.store("sections",{
@@ -118,6 +103,11 @@ export default class Chat{
         
     }
 
+
+    /**
+     * This function causes 3 fetches which need to pass through the middleware 
+     * it should be refactored to only use one fetch to achieve the same result
+     */
     public async initialize_notebooks(){
         const notebooks = this.storage_service.get("notebooks");
         if(notebooks != null){
@@ -133,33 +123,26 @@ export default class Chat{
     }
 
     private async get_all_notebooks(){
-        const res = await this.fetch("/API/QDrant/notebook/get_all",{
+        const res = await this.fetch("/api/qdrant/notebook/get_all",{
             method:"GET"
         })
         return await res.json();
     }
 
-    private async get_all_sections(notebook:string){
-        const res = await this.fetch("/API/QDrant/section/get_all",{
+    private async get_all_sections(){
+        const res = await this.fetch("/api/qdrant/section/get_all",{
             method:"POST",
-            body:JSON.stringify({
-                notebook:notebook
-            })
         })
         return new Map(await res.json());
     }
 
     private async get_all_notes(){
-        const res = await this.fetch("/API/QDrant/note/get_all",{
+        const res = await this.fetch("/api/qdrant/note/get_all",{
             method:"POST",
-            body:JSON.stringify({
-                notebook:this.context?.notebook as string,
-                section:this.context?.section as string
-            })
         })
         return new Map(await res.json());
     }
-
+    /*
     private chat_create_notebook(){
         
         const messages=[{
@@ -172,8 +155,8 @@ export default class Chat{
         this.set_state(ChatState.User_answer);
         this.set_action(this.create_notebook);
         this.update_function(messages);
-    }
-
+    }*/
+    /*
     private chat_select_notebook(){
             
         const options = this.notebooks.map((notebook:any)=>{
@@ -205,8 +188,9 @@ export default class Chat{
             options:options
         } as Message])
     }
+        */
 
-    private async create_notebook(title:string,topic:string,description:string){
+    /*private async create_notebook(title:string,topic:string,description:string){
         const notebook_id = uuidv4();
         await this.fetch("/API/QDrant/notebook/create",{
             method:"POST",
@@ -218,14 +202,7 @@ export default class Chat{
             })
         })
         this.set_state(ChatState.Notebook_context);
-        this.context = {
-            ...this.context,
-            notebook:notebook_id
-        }
-        this.public_context = {
-            ...this.public_context,
-            notebook: title
-        };
+
         this.update_context(this.public_context);
         this.create_section("General","General","This is the general section of the notebook",true);
         this.update_function([{
@@ -236,9 +213,9 @@ export default class Chat{
                 {text:"Nueva nota", func:this.chat_create_note.bind(this)}
             ]
         } as Message]);
-    }
+    }*/
 
-    private chat_create_section(){
+    /*private chat_create_section(){
 
         const messages=[{
             type:"normal",
@@ -250,11 +227,11 @@ export default class Chat{
         this.set_action(this.create_section);
         this.update_function(messages);
 
-    }
+    }*/
 
     
 
-    private async create_section(title:string,topic:string, description:string, default_section:boolean=false){
+    /*private async create_section(title:string,topic:string, description:string, default_section:boolean=false){
         const section_id = uuidv4();
         await this.fetch("/API/QDrant/section/create",{
             method:"POST",
@@ -268,22 +245,12 @@ export default class Chat{
             })
         })
         if(default_section){
-            this.context = {
-                ...this.context,
-                section:section_id
-            }
-            this.public_context = {
-                ...this.public_context,
-                section: title
-            };
+
+
             this.update_context(this.public_context);
             return;
         }else{
             this.set_state(ChatState.Section_context);
-            this.context = {
-                ...this.context,
-                section:section_id
-            }
             this.update_function([{
                 type:"menu",
                 text:"Seccion creada con exito, ahora puedes empezar a agregar notas a esta seccion",
@@ -292,9 +259,9 @@ export default class Chat{
                 ]
             } as Message]);
         }
-    }
+    }*/
 
-    private chat_create_note(){
+    /*private chat_create_note(){
         
 
         const messages=[{
@@ -307,19 +274,17 @@ export default class Chat{
         this.set_state(ChatState.User_answer);
         this.set_action(this.create_note);
     }
-
+    */
 
 
     
 
-    private async create_note(title:string){
+    /*private async create_note(title:string){
         const note_id = uuidv4();
         await this.fetch("/API/QDrant/note/create",{
             method:"POST",
             body:JSON.stringify({
                 id:note_id,
-                notebook:this.context?.notebook,
-                section:this.context?.section,
                 title:title,
             })
         })
@@ -335,8 +300,8 @@ export default class Chat{
             type:"normal",
             text:"Nota creada con exito, todo lo que hablemos ahora sera almacenado en esta nota"
         } as Message]);
-    }
-
+    }*/
+    /*
     private async add_message_to_note(user_prompt:string, response:string){
         await this.fetch("/API/QDrant/message/create",{
             method:"POST",
@@ -350,16 +315,16 @@ export default class Chat{
             })
         })
     }
+    */
     
 
-    private async chat(prompt:string){
-        const res = await this.fetch("/API/ChatGPT",{
+    private async chat(prompt:string, context:Context){
+        const res = await this.fetch("/api/chatgpt",{
             method:"POST",
             headers: { 'Content-Type': 'application/json' },
             body:JSON.stringify({
                 prompt:prompt,
-                context:this.context,
-                public_context:this.public_context
+                context:context
             })
         })
         return await res.json();
@@ -373,52 +338,15 @@ export default class Chat{
         this.state = state;
     }
 
-    public async respond(params:string){
+    public async respond(params:string, context:Context){
         this.update_function([{
             type:"normal",
             text:params,
             user_generated:true
         } as Message]);
-        console.log("Current state",this.state);
-        if(this.state == ChatState.User_answer && this.action!=undefined){
-            this.action(...params.split(","));
-            if(this.public_context.notebook != "Todo"){
-                this.set_state(ChatState.Notebook_context);
-            }else if(this.public_context.section != "Todo"){
-                this.set_state(ChatState.Section_context);
-            }
+ 
 
-        }else if(this.state == ChatState.Note_context){
-            // Aqui falta poner el rag antes de mandarlo al chat 
-
-            const res = await this.chat(params as string);
-            this.update_function([{
-                type:"normal",
-                text:res,
-                user_generated:false
-            } as Message])
-
-            this.add_message_to_note(params, res);
-
-        }else if(this.state == ChatState.Section_context){
-
-            const res = await this.chat(params as string);
-            this.update_function([{
-                type:"normal",
-                text:res,
-                user_generated:false
-            } as Message])
-
-        }else if(this.state == ChatState.Notebook_context){
-            
-            const res = await this.chat(params as string);
-            this.update_function([{
-                type:"normal",
-                text:res,
-                user_generated:false
-            } as Message])
-        }else{
-            const res = await this.chat(params as string);
+        const res = await this.chat(params as string, context);
             console.log(res);
                 this.update_function([{
                     type:"normal",
@@ -426,7 +354,8 @@ export default class Chat{
                     user_generated:false
                 } as Message])
   
-        }
 
     }
+
+
 }

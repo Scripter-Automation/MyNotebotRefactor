@@ -1,5 +1,5 @@
-import FirebsaeAdminService from "$lib/Services/firebaseAdminService";
-import QdrantService from "$lib/Services/qdrantService";
+import FirebsaeAdminService from "$lib/Services/Server/FirebaseAdminService";
+import QdrantService from "$lib/Services/Server/QdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ request, cookies }) => {

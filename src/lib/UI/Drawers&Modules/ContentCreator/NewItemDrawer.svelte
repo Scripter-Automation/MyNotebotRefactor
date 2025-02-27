@@ -9,7 +9,7 @@
   export let drawer_context: string = "";
   export let toggle_drawer: () => void;
   export let content:NotebookInstance[]
-  export let update_content:(new_content:NotebookInstance[])=>void;
+  export let update_content: (new_content: NotebookInstance[]) => void;
   const title: { [key: string]: string } = {
     notebooks: "Estas a punto de crear un cuaderno",
     sections: "Estas a punto de crear una seccion",

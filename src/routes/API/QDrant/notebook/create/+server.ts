@@ -1,7 +1,7 @@
-import OpenAIService from "$lib/Services/OpenAIService";
+import OpenAIService from "$lib/Services/Server/OpenAIService";
 import type { RequestHandler } from "@sveltejs/kit";
-import QdrantService from "$lib/Services/qdrantService";
-import FirebsaeAdminService from "$lib/Services/firebaseAdminService";
+import QdrantService from "$lib/Services/Server/QdrantService";
+import FirebsaeAdminService from "$lib/Services/Server/FirebaseAdminService";
 
 /**
  * Seria buena idea que se creara tambien un embeding de la descripcion
