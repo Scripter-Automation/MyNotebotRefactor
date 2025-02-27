@@ -1,9 +1,9 @@
 import type { NotebookBuilder, NotebookInstance } from "../../../app";
-import type { Item } from "../storage.service";
-import APIService from "./APIService";
+import type { Item } from "../../Services/Client/StorageService";
+import APIService from "../APIService";
 
 export default class NotebookEndpoint extends APIService {
-    endpoint: string = "/API/QDrant/notebook";
+    endpoint: string = "/api/qdrant/notebook";
 
     constructor(){
         super();        

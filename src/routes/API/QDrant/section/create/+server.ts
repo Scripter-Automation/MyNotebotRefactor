@@ -1,6 +1,6 @@
-import FirebsaeAdminService from "$lib/Services/firebaseAdminService";
-import FirebaseService from "$lib/Services/firebaseService";
-import QdrantService from "$lib/Services/qdrantService";
+import FirebsaeAdminService from "$lib/Services/Server/FirebaseAdminService";
+import FirebaseService from "$lib/Services/Client/FirebaseService";
+import QdrantService from "$lib/Services/Server/QdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
 import type { SectionInstance } from "../../../../../app";
 

@@ -6,7 +6,7 @@
     import { toast } from "svelte-sonner";
     import type { NoteBuilder, NoteInstance, NotebookInstance } from "../../../../app";
     import * as Select from "$lib/components/ui/select/index.js";
-    import NoteEndopoint from "$lib/Services/API/NoteEndpoint";
+    import NoteEndopoint from "$lib/SDK/VectorDB/NoteEndpoint";
 
     export let toggle_drawer:()=>void;
     export let content:NotebookInstance[];

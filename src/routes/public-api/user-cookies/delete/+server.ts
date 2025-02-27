@@ -1,4 +1,4 @@
-import FirebaseAdminService from "$lib/Services/firebaseAdminService";
+import FirebaseAdminService from "$lib/Services/Server/FirebaseAdminService";
 import { redirect, type RequestHandler } from "@sveltejs/kit";
 
 

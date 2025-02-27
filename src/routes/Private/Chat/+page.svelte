@@ -86,9 +86,7 @@
     }
 
 
-    function ask(){
-        chat_service.respond(user_input)
-    }
+ 
         
     function handleKeyDown(event:KeyboardEvent) {
         if (event.key === 'Enter' && !event.shiftKey) { 
@@ -167,6 +165,10 @@
 
     function update_content(new_content:NotebookInstance[]){
         content = new_content;
+    }
+
+    function ask(){
+        chat_service.respond(user_input, context);
     }
 
 

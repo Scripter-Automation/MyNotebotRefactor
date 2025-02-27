@@ -1,7 +1,7 @@
-import FirebaseAdminService from "$lib/Services/firebaseAdminService";
-import FirebaseService from "$lib/Services/firebaseService";
-import OpenAIService from "$lib/Services/OpenAIService";
-import QdrantService from "$lib/Services/qdrantService";
+import FirebaseAdminService from "$lib/Services/Server/FirebaseAdminService";
+import FirebaseService from "$lib/Services/Client/FirebaseService";
+import OpenAIService from "$lib/Services/Server/OpenAIService";
+import QdrantService from "$lib/Services/Server/QdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
 
 type contextMessage = {
@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     const rag = new QdrantService(firebase.get_uid(await firebase.getUser(cookies.get("email"))));
     const embeding = await openai.generate_embeding(data.prompt);
 
-    const query = await rag.get_context(data.context, data.public_context,embeding);
+    const query = await rag.get_context(data.context, embeding);
     console.log("generating")
     console.log(query?.points);
     let payload:string= "Sin contexto encontrado, contesta como lo harias normalmente";;

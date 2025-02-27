@@ -1,5 +1,5 @@
 import type { PageLoad } from "./$types";
-import Chat from "$lib/Services/ChatService";
+import Chat from "$lib/Services/Client/ChatService";
 import type { Message } from "../../../app";
 
 export const load: PageLoad = async ({ fetch }) => {
@@ -65,7 +65,6 @@ export const load: PageLoad = async ({ fetch }) => {
     await chat_service.initialize_notes();
 
     messages = chat_service.get_messages();
-    context = chat_service.get_context();
 
 
 
@@ -73,7 +72,6 @@ export const load: PageLoad = async ({ fetch }) => {
     return {
         chat_service,
         messages,
-        context,
         read_this
         
     }

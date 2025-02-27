@@ -3,7 +3,7 @@ import {type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, 
 import {serialize} from "cookie";
 import { goto } from "$app/navigation";
 import type { Persistence } from "firebase/auth";
-import StorageService from "./storage.service";
+import StorageService from "./StorageService";
 
 
 export default class FirebaseService{
@@ -48,7 +48,7 @@ export default class FirebaseService{
                     "Content-Type":"application/json"
                 }
             })
-            goto("/Private/Chat")
+            goto("/private/chat")
         }catch(err){
             throw err
         }
@@ -73,7 +73,7 @@ export default class FirebaseService{
             await fetch("/register",{
                 method:"POST"
               })
-            goto("/Private/Chat")
+            goto("/private/chat")
         }catch(err){
             throw err
         }

@@ -6,7 +6,7 @@
     import { toast } from "svelte-sonner";
     import * as Select from "$lib/components/ui/select/index.js";
     import type { NotebookInstance, SectionBuilder, SectionInstance } from "../../../../app";
-    import SectionEndpoint from "$lib/Services/API/SectionEndpoint";
+    import SectionEndpoint from "$lib/SDK/VectorDB/SectionEndpoint";
 
 
     export let toggle_drawer:()=>void;

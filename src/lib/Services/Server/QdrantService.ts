@@ -1,6 +1,6 @@
 import {QdrantClient} from '@qdrant/js-client-rest'
 import { config } from 'dotenv';
-import type {  Note, Notebook, NotebookCreator, NotebookInstance, NoteCreator, NoteInstance, NoteMessage, Section, SectionBuilder, SectionCreator, SectionInstance } from '../../app';
+import type {  Context, Note, Notebook, NotebookCreator, NotebookInstance, NoteCreator, NoteInstance, NoteMessage, Section, SectionBuilder, SectionCreator, SectionInstance } from '../../../app';
 import OpenAIService from './OpenAIService';
 
 enum Notebook_Object_Type {
@@ -292,8 +292,16 @@ export default class QdrantService{
     }
         
 
-    public async get_context(context:{notebook:string,section:string,note:string},public_context:{notebook:string,section:string,note:string},prompt:number[]){
-        const filter = {
+    public async get_context(context:Context, prompt:number[]){
+       
+       const filter = {
+        must:[
+            {
+                key:"object_type"
+            }
+        ]
+       }
+        /*const filter = {
             must:[
                 {
                     key:"object_type",
@@ -329,7 +337,7 @@ export default class QdrantService{
                     value:context.note
                 }
             })
-        }
+        }*/
 
         return await this.client?.query(this.user_id,{
             query:prompt,
