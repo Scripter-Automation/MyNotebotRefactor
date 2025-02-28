@@ -59,7 +59,7 @@ interface SectionCreator extends Section {
 
 interface SectionInstance extends Section {
     id: string;
-    children: NoteInstance|SectionInstance[];
+    children: NoteInstance[]|SectionInstance[];
 }
 
 interface Note {
@@ -187,6 +187,7 @@ enum LLMs {
 
 interface BaseMessage{
     content:string;
+    user_generated:boolean;
     [key:string]: any;
 }
 
@@ -212,4 +213,4 @@ type MessageModel<T extends LLMs> = T extends LLMs.gpt4o | LLMs.gpt3turbo ?
 
 
 
-export {MessageModel, RoleType, ChatGPTRoleType, OtherRoleType, LLMs, Conversation, Context, ContentType, Notebook, NotebookCreator, NotebookBuilder, NotebookInstance, Section, SectionCreator, SectionBuilder, SectionInstance, Note, NoteCreator, NoteInstance, NoteBuilder, Message};
+export {BaseMessage, MessageModel, RoleType, ChatGPTRoleType, OtherRoleType, LLMs, Conversation, Context, ContentType, Notebook, NotebookCreator, NotebookBuilder, NotebookInstance, Section, SectionCreator, SectionBuilder, SectionInstance, Note, NoteCreator, NoteInstance, NoteBuilder, Message};

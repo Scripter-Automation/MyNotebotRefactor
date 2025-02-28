@@ -2,9 +2,9 @@ import type { Conversation } from "../../app";
 
 
 export default abstract class LLMAPIService{
-    abstract endpoints:{[key:string]:string};
-    abstract chatHistory: Conversation[];
-    abstract developerInstructions?:string;
+    protected abstract endpoints:{[key:string]:string};
+    protected abstract chatHistory: Conversation[];
+    protected abstract developerInstructions?:string;
     static ChatSummary:string = ""
 
     abstract promptLLM(prompt:string):Promise<{success:boolean, message:string, response:string}>;

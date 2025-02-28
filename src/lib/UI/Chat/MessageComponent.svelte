@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type { Message } from "../../app";
+    import type { BaseMessage } from "../../../app";
 
-    export let message:Message
+    export let message:BaseMessage
     
     
 </script>

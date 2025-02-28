@@ -1,8 +1,8 @@
-import type { NoteBuilder, NoteInstance } from "../../../app";
+import type { ContentType, NoteBuilder, NoteInstance } from "../../../app";
 import type { Item } from "../../Services/Client/StorageService";
 import APIService from "../APIService";
 
-export default class NoteEndopoint extends APIService{
+export default class EndpointNote extends APIService{
     endpoint: string = "/api/qdrant/note";
 
     constructor(){
@@ -23,7 +23,7 @@ export default class NoteEndopoint extends APIService{
     }
     async create(params: NoteBuilder): Promise<{ success: boolean; message: string; object?: NoteInstance;}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:"notes"}
+            params = {...params, id:this.generate_UID() ,object_type:"notes" as ContentType}
             fetch(this.endpoint+"/create",
                 {
                     method:"POST",

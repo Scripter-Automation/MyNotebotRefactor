@@ -3,10 +3,10 @@
     import {Input} from "$lib/components/ui/input";
     import {Label} from "$lib/components/ui/label";
     import {Textarea} from "$lib/components/ui/textarea"
-    import NotebookEndpoint from "$lib/SDK/VectorDB/NotebookEndpoing";
+    import EndpointNotebook from "$lib/SDK/VectorDB/EndpointNotebook";
     import { toast } from "svelte-sonner";
-    
     import type {  Notebook, NotebookBuilder, NotebookInstance } from "../../../../app";
+
     
 
     export let toggle_drawer:()=>void;
@@ -19,7 +19,7 @@
         const formDataObject = Object.fromEntries(data.entries()) as NotebookBuilder;
 
 
-        const res = await new NotebookEndpoint().create(formDataObject) 
+        const res = await new EndpointNotebook().create(formDataObject) 
 
         if(res.success){
             content.push(res.object as NotebookInstance);

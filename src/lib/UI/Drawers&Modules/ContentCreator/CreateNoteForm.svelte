@@ -6,7 +6,8 @@
     import { toast } from "svelte-sonner";
     import type { NoteBuilder, NoteInstance, NotebookInstance } from "../../../../app";
     import * as Select from "$lib/components/ui/select/index.js";
-    import NoteEndopoint from "$lib/SDK/VectorDB/NoteEndpoint";
+    import EndpointNote from "$lib/SDK/VectorDB/EndpointNote";
+   
 
     export let toggle_drawer:()=>void;
     export let content:NotebookInstance[];
@@ -21,7 +22,7 @@
         formDataObject.notebookId = content[selected_notebook as number].id;
         formDataObject.sectionId = content[selected_notebook as number].children[selected_section as number].id;
         
-       const res = await new NoteEndopoint().create(formDataObject);
+       const res = await new EndpointNote().create(formDataObject);
 
         if(res.success){
             content[selected_notebook as number].children[selected_section as number].children.push(res.object as NoteInstance);

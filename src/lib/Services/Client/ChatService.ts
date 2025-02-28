@@ -1,5 +1,5 @@
 
-import type { Context, Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
+import type { BaseMessage, Context, Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
 import {v4 as uuidv4} from 'uuid';
 import StorageService, { TimeFrame } from "./StorageService";
 
@@ -16,7 +16,7 @@ export enum ChatState{
 
 export default class Chat{
     private fetch: typeof fetch;
-    private messages:Message[];
+    private messages:BaseMessage[];
     private state:ChatState=ChatState.Entire_context;
     private storage_service = new StorageService();
 
@@ -26,16 +26,16 @@ export default class Chat{
     public notebooks:NotebookInstance[]=[];
     public sections:{[key: string]: SectionInstance[]} = {};
     public notes:{[key:string]:NoteInstance[]} = {};
-    public recorded_messages:{[key:string]:Message[]} = {};
+    public recorded_messages:{[key:string]:BaseMessage[]} = {};
     private action?:(...params:any[])=>void;
-    private update_function:(messages:Message[])=>void;
+    private update_function:(messages:BaseMessage[])=>void;
     private update_context:(context:{notebook:string, section:string, note:string})=>void;
 
 
 
 
-    constructor(messages:Message[]=[],
-         update_function:(messages:Message[])=>void,
+    constructor(messages:BaseMessage[]=[],
+         update_function:(messages:BaseMessage[])=>void,
          update_context:(context:{notebook:string, section:string,note:string})=>void,
          customFetch: typeof fetch
         ){
@@ -69,10 +69,10 @@ export default class Chat{
         return this.notes;
     }
 
-    public setUpdateFunction(func:(messages:Message[])=>void){
+    public setUpdateFunction(func:(messages:BaseMessage[])=>void){
         this.update_function = func;
     }
-
+    /* Depricated
     public async initialize_notes(){
         const notes = this.storage_service.get("notes");
         if(notes != null){
@@ -102,12 +102,10 @@ export default class Chat{
         }
         
     }
-
+    */
 
     /**
-     * This function causes 3 fetches which need to pass through the middleware 
-     * it should be refactored to only use one fetch to achieve the same result
-     */
+    Depricated
     public async initialize_notebooks(){
         const notebooks = this.storage_service.get("notebooks");
         if(notebooks != null){
@@ -122,26 +120,8 @@ export default class Chat{
 
     }
 
-    private async get_all_notebooks(){
-        const res = await this.fetch("/api/qdrant/notebook/get_all",{
-            method:"GET"
-        })
-        return await res.json();
-    }
+    */
 
-    private async get_all_sections(){
-        const res = await this.fetch("/api/qdrant/section/get_all",{
-            method:"POST",
-        })
-        return new Map(await res.json());
-    }
-
-    private async get_all_notes(){
-        const res = await this.fetch("/api/qdrant/note/get_all",{
-            method:"POST",
-        })
-        return new Map(await res.json());
-    }
     /*
     private chat_create_notebook(){
         
@@ -156,7 +136,9 @@ export default class Chat{
         this.set_action(this.create_notebook);
         this.update_function(messages);
     }*/
+   
     /*
+    Depricated but useful for example of chat functions
     private chat_select_notebook(){
             
         const options = this.notebooks.map((notebook:any)=>{
@@ -341,18 +323,18 @@ export default class Chat{
     public async respond(params:string, context:Context){
         this.update_function([{
             type:"normal",
-            text:params,
+            content:params,
             user_generated:true
-        } as Message]);
+        } as BaseMessage]);
  
 
         const res = await this.chat(params as string, context);
             console.log(res);
                 this.update_function([{
                     type:"normal",
-                    text:res,
+                    content:res,
                     user_generated:false
-                } as Message])
+                } as BaseMessage])
   
 
     }

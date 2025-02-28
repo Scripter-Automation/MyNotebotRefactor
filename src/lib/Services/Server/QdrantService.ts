@@ -1,14 +1,7 @@
 import {QdrantClient} from '@qdrant/js-client-rest'
 import { config } from 'dotenv';
-import type {  Context, Note, Notebook, NotebookCreator, NotebookInstance, NoteCreator, NoteInstance, NoteMessage, Section, SectionBuilder, SectionCreator, SectionInstance } from '../../../app';
+import {  ContentType, type Context, type Note, type Notebook, type NotebookCreator, type NoteCreator, type Section, type SectionCreator } from '../../../app';
 import OpenAIService from './OpenAIService';
-
-enum Notebook_Object_Type {
-    Notebook = "notebooks",
-    Section = "sections",
-    Note = "notes",
-    Message = "messages"
-}
 
 
 
@@ -68,7 +61,7 @@ export default class QdrantService{
     public async create_notebook(id:string, title:string, topic:string, description:string){
         const notebook:NotebookCreator = {
             id:id,
-            object_type:Notebook_Object_Type.Notebook,
+            object_type:ContentType.notebooks,
             title:title,
             topic:topic,
             description:description
@@ -105,7 +98,7 @@ export default class QdrantService{
     public async create_section(id:string, notebook_id:string, title:string, topic:string, description:string){
         const section:SectionCreator = {
             id:id,
-            object_type:Notebook_Object_Type.Section,
+            object_type:ContentType.sections,
             topic:topic,
             notebookId:notebook_id,
             title:title,
@@ -142,7 +135,7 @@ export default class QdrantService{
                     {
                         key:"object_type",
                         match:{
-                            value:Notebook_Object_Type.Section
+                            value:ContentType.sections
                         }
                     },
                 ]
@@ -164,7 +157,7 @@ export default class QdrantService{
                 {
                     key:"object_type",
                     match:{
-                        value:Notebook_Object_Type.Note
+                        value:ContentType.notes
                     }
                 },
 
@@ -194,7 +187,7 @@ export default class QdrantService{
 
         const note = {
             id:id,
-            object_type:"notes",
+            object_type:ContentType.notes,
             notebookId:notebook_id,
             sectionId:section_id,
             title:title,
@@ -223,7 +216,7 @@ export default class QdrantService{
         }
 
     }
-
+    /* Depricated
     public async create_message(id:string, note_id:string, notebook_id:string, section_id:string, prompt:string, response:string){
         const message:NoteMessage = {
             id:id,
@@ -255,7 +248,7 @@ export default class QdrantService{
             throw new Error("Client not initialized")
         }
     }
-
+    */
     /**
      * Checks if the client of the service is initialized before performing any operation
      * @returns {boolean} if the client has been instanciated or not
@@ -277,7 +270,7 @@ export default class QdrantService{
                     {
                         key:"object_type",
                         match:{
-                            value:Notebook_Object_Type.Notebook
+                            value:ContentType.notebooks
                         }
                     }
                 ]

@@ -1,8 +1,8 @@
-import type { NotebookBuilder, NotebookInstance } from "../../../app";
+import type { ContentType, NotebookBuilder, NotebookInstance } from "../../../app";
 import type { Item } from "../../Services/Client/StorageService";
 import APIService from "../APIService";
 
-export default class NotebookEndpoint extends APIService {
+export default class EndpointNotebook extends APIService {
     endpoint: string = "/api/qdrant/notebook";
 
     constructor(){
@@ -11,7 +11,7 @@ export default class NotebookEndpoint extends APIService {
 
     async create(params: NotebookBuilder): Promise<{success:boolean,message:string, object?:NotebookInstance}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:"notebooks", children:[]}
+            params = {...params, id:this.generate_UID() ,object_type:"notebooks" as ContentType, children:[]}
             await fetch(this.endpoint + "/create", {
                 method: "POST",
                 body: JSON.stringify(params)

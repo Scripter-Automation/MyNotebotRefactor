@@ -1,6 +1,6 @@
 import type { PageLoad } from "./$types";
 import Chat from "$lib/Services/Client/ChatService";
-import type { Message } from "../../../app";
+import type { BaseMessage } from "../../../app";
 
 export const load: PageLoad = async ({ fetch }) => {
     
@@ -37,9 +37,9 @@ export const load: PageLoad = async ({ fetch }) => {
         context = new_context
     }
 
-    let messages:Message[] = [] 
+    let messages:BaseMessage[] = [] 
     
-    function update_messages(funcmessages:Message[]){
+    function update_messages(funcmessages:BaseMessage[]){
         messages = [...messages,...funcmessages]
         if(!funcmessages[funcmessages.length-1].user_generated){
             read_this(funcmessages[funcmessages.length-1].text)

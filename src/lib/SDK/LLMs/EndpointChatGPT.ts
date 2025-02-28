@@ -1,14 +1,14 @@
 
-import { Conversation } from '../../../../app';
+import type { Conversation } from '../../../app';
 import LLMAPIService from '../LLMAPIService';
 
 /** APIService doesn't seem to be the right inheritence for this class */
-export default class ChatGPTService extends LLMAPIService {
+export default class EndpointChatGPT extends LLMAPIService {
     endpoints = {
         prompt: "/API/ChatGPT/prompt",
         stream: "/API/ChatGPT/stream"
     };
-    chatHistory: Conversation[];
+    chatHistory: Conversation[] = [];
     developerInstructions?: string | undefined = `
         Eres una aplicación de RAG en la cual el usuario es capaz de usar información
         almacenada en forma de cuaderno, sección y nota. Basado en la información almacenada

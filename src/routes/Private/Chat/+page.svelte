@@ -1,12 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { ContentType, Context, Message, Note, Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
-    import MessageComponent from "$lib/UI/MessageComponent.svelte";
+    import type { BaseMessage, ContentType, Context, Message, Note, Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
+    import MessageComponent from "$lib/UI/Chat/MessageComponent.svelte";
     import { BsMicFill } from "svelte-icons-pack/bs";
-    import Chat from "$lib/Services/ChatService";
+    import Chat from "$lib/Services/Client/ChatService";
     import { Icon } from "svelte-icons-pack";
     import { firebaseStore } from "../../../store";
-    import type FirebaseService from "$lib/Services/firebaseService";
+    import type FirebaseService from "$lib/Services/Client/FirebaseService";
     import { LuNotebookPen, LuBrainCircuit } from "svelte-icons-pack/lu";
     import { TrFillLayoutSidebarLeftCollapse, TrFillLayoutSidebarLeftExpand} from "svelte-icons-pack/tr";
     import { BsSendFill } from "svelte-icons-pack/bs";
@@ -40,11 +40,11 @@
 
     export let data: PageProps;
     let chat_service:Chat = data.chat_service;
-    let messages:Message[] = data.messages;
+    let messages:BaseMessage[] = data.messages;
     let read_this = data.read_this;
 
     
-    function update_messages(funcmessages:Message[]){
+    function update_messages(funcmessages:BaseMessage[]){
         messages = [...messages,...funcmessages]
         if(!funcmessages[funcmessages.length-1].user_generated){
             read_this(funcmessages[funcmessages.length-1].text)
