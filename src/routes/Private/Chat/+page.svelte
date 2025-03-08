@@ -1,113 +1,87 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import type { BaseMessage, ContentType, Context, Message, Note, Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
-    import MessageComponent from "$lib/UI/Chat/MessageComponent.svelte";
-    import { BsMicFill } from "svelte-icons-pack/bs";
-    import Chat from "$lib/Services/Client/ChatService";
+    
+    import { type Context, type Note, type Notebook, type NotebookInstance,  type Section,} from "../../../types";
     import { Icon } from "svelte-icons-pack";
     import { firebaseStore } from "../../../store";
     import type FirebaseService from "$lib/Services/Client/FirebaseService";
     import { LuNotebookPen, LuBrainCircuit } from "svelte-icons-pack/lu";
     import { TrFillLayoutSidebarLeftCollapse, TrFillLayoutSidebarLeftExpand} from "svelte-icons-pack/tr";
-    import { BsSendFill } from "svelte-icons-pack/bs";
     import SideBar from "$lib/UI/UserContentSidebar/SideBar.svelte";
     import ContextPanel from "$lib/UI/Context/ContextPanel.svelte";
     import NewItemDrawer from "$lib/UI/Drawers&Modules/ContentCreator/NewItemDrawer.svelte";
     import { Toaster } from "$lib/components/ui/sonner";
+    import { BsChatLeftTextFill } from "svelte-icons-pack/bs";
     import type { PageProps } from "./$types";
+    
+    import ChatUi from "$lib/UI/Chat/ChatUI.svelte";
+    import NotebookUi from "$lib/UI/NotebookMode/NotebookUi.svelte";
 
+    /**
+    * Gets the props loaded in the page.ts which gets the instance of the chat service and context service
+    * Then intializes the necesary callbacks to allow the class to interact with the page
+    */
+    export let data: PageProps;
+    const context_service = data.context_service;
+    let content = context_service.get_content();
+
+    /**
+     * A callback function that allows the drawer to update the content of the user and share it with the 
+     * side bar
+     * @param new_content
+     */
+    function update_content(new_content:NotebookInstance[]){
+        content = new_content;
+    }
+
+    /**
+    * Initializes variables for the page, such as the text that the user is writing
+    * into the chat, and the firebase service instance. Defines if the drawer is open and if it
+    * has any context. 
+    */
 
 
     let firebaseService:FirebaseService;
+
     let drawer_toggle:boolean = false;
     let drawer_context:string = ""
 
+    /**
+     * This function opens the drawer to create a new item
+     * such as a notebook, section or note.
+     */
     function toggle_drawer(){
         drawer_toggle = !drawer_toggle;
     }
 
+
+    /**
+     * This function sets the context of the drawer to create
+     * a new item. For example defines the parent notebook or folder
+     * @param context
+     */
     function set_drawer_context(context:string){
         drawer_context = context;
     }
 
+
+    /**
+    * This function gets the firebase instance from the store and makes it available in 
+    * the page. 
+    */
     firebaseStore.subscribe((value)=>{
         firebaseService = value;
     })
 
+    /**
+     * Closes the user's session
+     */
     async function logout(){
         await firebaseService.logout();
     }
 
-    export let data: PageProps;
-    let chat_service:Chat = data.chat_service;
-    let messages:BaseMessage[] = data.messages;
-    let read_this = data.read_this;
-
-    
-    function update_messages(funcmessages:BaseMessage[]){
-        messages = [...messages,...funcmessages]
-        if(!funcmessages[funcmessages.length-1].user_generated){
-            read_this(funcmessages[funcmessages.length-1].text)
-        }
-    }
-
-    chat_service.setUpdateFunction(update_messages);
-
-
-
-    let user_input = "";
-    let listening = false
-    let recognition:any;
-    function listen(){
-        if(!listening){
-            listening = true;
-            if ('webkitSpeechRecognition' in window) {
-                recognition = new webkitSpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = 'es-ES'; // Set language to Spanish
-                recognition.onresult = (event) => {
-                    user_input = Array.from(event.results)
-                        .map(result => result[0].transcript)
-                        .join('');
-                };
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error', event.error);
-                };
-            } else {
-                console.warn('Speech recognition not supported in this browser.');
-            }
-            recognition.start();
-        }else{
-            listening = false;
-            recognition.stop();
-        }
-        
-    }
-
-
- 
-        
-    function handleKeyDown(event:KeyboardEvent) {
-        if (event.key === 'Enter' && !event.shiftKey) { 
-            event.preventDefault(); // Prevent the default action (new line)
-            ask(); 
-        }
-    }
-
-    let chat_container:HTMLDivElement;
-    
-    function scroll_to_bottom() {
-        if (chat_container) {
-            setTimeout(() => {
-                chat_container.scrollTop = chat_container.scrollHeight; 
-            }, 0); 
-        }
-    }
-
-    
-
-
+    /**
+     * Determines if the sidebar is open or closed, and also if the context bar is opened or closed 
+    */
     let open = [false,false];
 
 
@@ -120,64 +94,36 @@
         }
     }
 
-    
-
+    /**
+     * Stores the context of the chat, such as the notebooks, sections and notes that have
+     * been draged and droped to be used as reference for the RAG application.
+     */
     let context:Context = {notebooks:[], sections:[], notes:[]};
 
-
-    
-
-
+    /**
+     * This function handles the drop event when an item is dragged and dropped into the chat
+     * @param e The item being droped into the chat
+     */
     function handle_drop(e:any){
         const item:Notebook|Section|Note = JSON.parse(e.dataTransfer.getData("item"));
         context[item.object_type] = [...context[item.object_type], item];
     }
-
-
     
     function allowDrop(e:any) {
         e.preventDefault();
         //console.log(e);
     }
 
-    let content:NotebookInstance[] = [];
+    const Mode = {
+        Chat: "chat",
+        Notebook: "notebook"
+    };
 
-    let notebooks:NotebookInstance[] = chat_service?.notebooks;
-    let section:{[key:string]:SectionInstance[]} = chat_service?.sections;
-    let notes:{[key:string]:NoteInstance[]} = chat_service.notes;
-
-    notebooks.forEach((note)=>{
-        if(!section[note.id]){
-            section[note.id] = [];
-        }
-        section[note.id].forEach((item)=>{
-            if(notes[item.id] == undefined){
-                item.children = []
-            }else{
-                item.children = notes[item.id];
-            }
-
-        })
-
-        note.children = section[note.id];
-        content.push(note);
-    })
-
-    function update_content(new_content:NotebookInstance[]){
-        content = new_content;
-    }
-
-    function ask(){
-        chat_service.respond(user_input, context);
-    }
+    let mode:string = Mode.Chat;
 
 
 </script>
-<style>
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-</style>
+
 <div class="flex">
 
     <SideBar 
@@ -199,9 +145,15 @@
                 </button>
             </div>
             <div class="flex items-center space-x-2">
-                <button class="p-2 hover:shadow-md hover:border rounded">
+                {#if mode == Mode.Chat}
+                <button onclick={()=>mode = Mode.Notebook} class="p-2 hover:shadow-md hover:border rounded">
                     <Icon className="text-xl" src={LuNotebookPen} ></Icon>
                 </button>
+                {:else}
+                    <button onclick={()=>mode = Mode.Chat} class="p-2 hover:shadow-md hover:border rounded">
+                        <Icon className="text-xl" src={BsChatLeftTextFill} ></Icon>
+                    </button>
+                {/if}
                 <button class="p-2 hover:shadow-md hover:border rounded" onclick={()=>open[1] = !open[1]}>
                     <Icon className="text-xl" src={LuBrainCircuit} ></Icon>
                 </button>
@@ -211,26 +163,16 @@
         <div class="flex flex-grow" ondragover={allowDrop} ondrop={handle_drop} role="main">
             <div class="flex grow">
                 <main class="flex flex-col grow">
-                    <!--This is the element that should take the entire space-->
-                    <div id="chat_container" class="h-full flex flex-col overflow-y-scroll no-scrollbar grow" bind:this={chat_container}>
-                        {#each messages as message}
-                            <MessageComponent {message}></MessageComponent>
-                        {/each}
-                    </div>
-                    <!--This is the chatbox that should go at the bottom of the page-->
-                    <div class="w-full pb-5 flex justify-center">
-                        <div class="w-5/6 space-x-2 border bg-gray-200 rounded-3xl p-5 shadow-lg">
-                            <div class="w-full md:w-full relative">
-                                <textarea onkeydown={handleKeyDown} id="UserInput" class="focus:outline-none focus:ring-0 focus:border-transparent bg-gray-200 border rounded w-full h-full p-2" placeholder="¿De qué quieres hablar?" bind:value={user_input}></textarea>
-                            </div>
-                            <div class="w-full flex justify-end">
-                                <button onclick={user_input != "" ? ask : listen} id="Enviar" class="flex items-center justify-center bg-black p-2 hover:opacity-70 text-white rounded-full"><Icon src={user_input != "" ? BsSendFill : BsMicFill}></Icon></button>
-                            </div>
-                        </div>
-                    </div>
+                    
+                    {#if mode == Mode.Chat}
+                        <ChatUi {context}/>
+                    {:else}
+                        <NotebookUi />
+                    {/if}
                 </main>
             </div>
             
+
                 <ContextPanel {context} open={open[1]}></ContextPanel>
             
         </div>

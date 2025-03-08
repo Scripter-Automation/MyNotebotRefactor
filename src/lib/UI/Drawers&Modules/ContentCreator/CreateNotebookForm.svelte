@@ -5,7 +5,7 @@
     import {Textarea} from "$lib/components/ui/textarea"
     import EndpointNotebook from "$lib/SDK/VectorDB/EndpointNotebook";
     import { toast } from "svelte-sonner";
-    import type {  Notebook, NotebookBuilder, NotebookInstance } from "../../../../app";
+    import type {  Notebook, NotebookBuilder, NotebookInstance } from "../../../../types";
 
     
 

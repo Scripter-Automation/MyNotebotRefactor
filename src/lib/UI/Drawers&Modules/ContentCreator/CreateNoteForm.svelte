@@ -4,7 +4,7 @@
     import {Label} from "$lib/components/ui/label";
     import {Textarea} from "$lib/components/ui/textarea"
     import { toast } from "svelte-sonner";
-    import type { NoteBuilder, NoteInstance, NotebookInstance } from "../../../../app";
+    import type { NoteBuilder, NoteInstance, NotebookInstance } from "../../../../types";
     import * as Select from "$lib/components/ui/select/index.js";
     import EndpointNote from "$lib/SDK/VectorDB/EndpointNote";
    

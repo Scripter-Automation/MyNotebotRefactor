@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { NotebookInstance } from "../../../app";
+    import type { NotebookInstance } from "../../../types";
     import NootbookContent from "./NootbookContent.svelte";
     import * as DropDownMenu from "$lib/components/ui/dropdown-menu"; 
     import { Ellipsis } from 'lucide-svelte';

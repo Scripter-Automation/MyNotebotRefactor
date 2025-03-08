@@ -1,4 +1,4 @@
-import type { ContentType, NotebookBuilder, NotebookInstance } from "../../../app";
+import {  ContentType, type NotebookBuilder, type NotebookInstance } from "../../../types";
 import type { Item } from "../../Services/Client/StorageService";
 import APIService from "../APIService";
 
@@ -11,7 +11,7 @@ export default class EndpointNotebook extends APIService {
 
     async create(params: NotebookBuilder): Promise<{success:boolean,message:string, object?:NotebookInstance}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:"notebooks" as ContentType, children:[]}
+            params = {...params, id:this.generate_UID() ,object_type:ContentType.notebooks, children:[]}
             await fetch(this.endpoint + "/create", {
                 method: "POST",
                 body: JSON.stringify(params)

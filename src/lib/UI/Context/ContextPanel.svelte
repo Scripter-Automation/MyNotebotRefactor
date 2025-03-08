@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { ContentType, Context, Notebook, Section } from "../../../app";
+    import type { ContentType, Context, Notebook, Section } from "../../../types";
     import ContextContent from "./ContextContent.svelte";
 
 

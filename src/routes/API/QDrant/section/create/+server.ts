@@ -2,7 +2,7 @@ import FirebsaeAdminService from "$lib/Services/Server/FirebaseAdminService";
 import FirebaseService from "$lib/Services/Client/FirebaseService";
 import QdrantService from "$lib/Services/Server/QdrantService";
 import type { RequestHandler } from "@sveltejs/kit";
-import type { SectionInstance } from "../../../../../app";
+import type { SectionInstance } from "../../../../../types";
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
     const firebase = await FirebsaeAdminService.getInstance();

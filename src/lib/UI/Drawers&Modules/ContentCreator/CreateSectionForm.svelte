@@ -5,7 +5,7 @@
     import {Textarea} from "$lib/components/ui/textarea"
     import { toast } from "svelte-sonner";
     import * as Select from "$lib/components/ui/select/index.js";
-    import type { NotebookInstance, SectionBuilder, SectionInstance } from "../../../../app";
+    import type { NotebookInstance, SectionBuilder, SectionInstance } from "../../../../types";
     import EndpointSection from "$lib/SDK/VectorDB/EndpointSection";
 
 

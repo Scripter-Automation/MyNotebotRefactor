@@ -1,6 +1,6 @@
 import {QdrantClient} from '@qdrant/js-client-rest'
 import { config } from 'dotenv';
-import {  ContentType, type Context, type Note, type Notebook, type NotebookCreator, type NoteCreator, type Section, type SectionCreator } from '../../../app';
+import { ContentType, type Context, type NotebookBuilder, type NotebookCreator, type NotebookInstance, type NoteBuilder, type NoteCreator, type NoteInstance, type SectionBuilder, type SectionCreator, type SectionInstance } from '../../../types';
 import OpenAIService from './OpenAIService';
 
 
@@ -127,7 +127,7 @@ export default class QdrantService{
         }
     }
 
-    public async get_all_sections():Promise<Section[]>{ 
+    public async get_all_sections():Promise<SectionBuilder[]>{ 
         if(this.check_client()){
             const result = await this.client?.scroll(this.user_id,{
                filter:{
@@ -143,7 +143,7 @@ export default class QdrantService{
             });
 
             return result?.points.map((point)=>{
-                return point.payload as Section;
+                return point.payload as SectionBuilder;
             }) ?? [];
         }else{
             throw new Error("Client not initialized")
@@ -151,7 +151,7 @@ export default class QdrantService{
     }
 
 
-    public async get_all_notes():Promise<Note[]>{
+    public async get_all_notes():Promise<NoteBuilder[]>{
         const filter = {
             must:[
                 {
@@ -171,7 +171,7 @@ export default class QdrantService{
                     filter:filter
                     });
                 return result?.points.map((point)=>{
-                    return point.payload as Note;
+                    return point.payload as NoteBuilder;
                 }) ?? [];
 
             }catch(error){
@@ -216,39 +216,9 @@ export default class QdrantService{
         }
 
     }
-    /* Depricated
-    public async create_message(id:string, note_id:string, notebook_id:string, section_id:string, prompt:string, response:string){
-        const message:NoteMessage = {
-            id:id,
-            object_type:Notebook_Object_Type.Message,
-            note_id:note_id,
-            notebookId:notebook_id,
-            sectionId:section_id,
-            prompt:prompt,
-            response:response
-        }
-        const vector = await this.llm.generate_embeding(JSON.stringify(message));
-        if(this.check_client()){
-            try{
-                this.client?.upsert(this.user_id,{
-                    points:[
-                        {
-                            id:message.id,
-                            payload:message,
-                            vector:vector
-                        }
-                    ]
-                })
+    
 
-            }catch(error){
-                console.error(error)
-            }
-            
-        }else{
-            throw new Error("Client not initialized")
-        }
-    }
-    */
+
     /**
      * Checks if the client of the service is initialized before performing any operation
      * @returns {boolean} if the client has been instanciated or not
@@ -261,7 +231,7 @@ export default class QdrantService{
      * Gets all the notebooks that the user has created
      * @returns {Notebook[]} An array of notebooks
      */
-    public async get_all_notebooks():Promise<Notebook[]>{
+    public async get_all_notebooks():Promise<NotebookBuilder[]>{
         if(this.check_client()){
 
             const result = await this.client?.scroll(this.user_id,{
@@ -277,60 +247,58 @@ export default class QdrantService{
                },
             });
             return result?.points.map((point)=>{
-                return point.payload as Notebook;
+                return point.payload as NotebookBuilder;
             }) ?? [];
         }else{
             throw new Error("Client not initialized")
         }
     }
+
+    private async recursiveNoteExtraction(section:SectionInstance, noteArr:string[]){
+        section.children.forEach((item: SectionInstance | NoteInstance)=>{
+            if(item.object_type == ContentType.sections){
+                this.recursiveNoteExtraction(item as SectionInstance, noteArr)
+            }else{
+                noteArr.push((item as NoteInstance).id)
+            }
+        })
+    }
+
+    private generateFilterFromContext(context:Context){
+
+        let notes:string[] = [];
+
+        (context.notebooks as NotebookInstance[]).forEach((notebook)=>{
+            notebook.children?.forEach((section: SectionInstance) => {
+                this.recursiveNoteExtraction(section, notes);
+            });
+        });
+
+        (context.sections as SectionInstance[])?.forEach((section:SectionInstance)=>{
+            this.recursiveNoteExtraction(section, notes)
+        });
+
+
+        (context.notes as NoteInstance[])?.forEach((note)=>{
+            notes.push(note.id);
+        });
+
+        return { 
+            must:[
+                {
+                    key: "id",
+                    match:{ any: notes}
+                }
+            ] 
+        };
+    }
         
 
     public async get_context(context:Context, prompt:number[]){
+
+       const filter = this.generateFilterFromContext(context);
        
-       const filter = {
-        must:[
-            {
-                key:"object_type"
-            }
-        ]
-       }
-        /*const filter = {
-            must:[
-                {
-                    key:"object_type",
-                    match:{
-                        value:"messages"
-                    }
-                },
-            ]
-        }
 
-        if(public_context.notebook != "General"){
-            filter.must.push({
-                key:"notebookId",
-                match:{
-                    value:context.notebook
-                }
-            })
-        }
-
-        if(public_context.section != "General"){
-            filter.must.push({
-                key:"sectionId",
-                match:{
-                    value:context.section
-                }
-            })
-        }
-
-        if (public_context.note != "General"){
-            filter.must.push({
-                key:"note_id",
-                match:{
-                    value:context.note
-                }
-            })
-        }*/
 
         return await this.client?.query(this.user_id,{
             query:prompt,

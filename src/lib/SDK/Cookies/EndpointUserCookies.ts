@@ -22,7 +22,7 @@ export default class EndpointUserCookies extends CookiesAPIService{
     }
     public async create(params: {email:string, token:string, register:boolean}): Promise<{ success: boolean; message: string; object?: any; }> {
         try{
-            console.log(params);
+            //console.log(params);
             await fetch(this.endpoint + "/create", {
                 method: "POST",
                 body: JSON.stringify(params)

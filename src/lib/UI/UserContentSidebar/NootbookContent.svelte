@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import type { NotebookInstance, SectionInstance, NoteInstance } from "../../../app";
+    import type { NotebookInstance, SectionInstance, NoteInstance } from "../../../types";
     import NotebookContent from "./NootbookContent.svelte";
     import { Notebook as NoteIcon,  Bookmark, StickyNote  }  from 'lucide-svelte';
 
-    export let content:NotebookInstance[]|SectionInstance[]|NoteInstance[];
+    export let content:(NotebookInstance | SectionInstance | NoteInstance)[];
     export let level;
 
     let open:boolean[] = [];

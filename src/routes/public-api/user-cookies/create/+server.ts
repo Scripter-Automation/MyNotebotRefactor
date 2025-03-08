@@ -1,6 +1,6 @@
 import FirebaseAdminService from "$lib/Services/Server/FirebaseAdminService";
 import QdrantService from "$lib/Services/Server/QdrantService";
-import { redirect, type RequestHandler } from "@sveltejs/kit";
+import { type RequestHandler } from "@sveltejs/kit";
 import {v4 as uuid4} from 'uuid';
 
 export const POST: RequestHandler = async ({request, cookies})=>{

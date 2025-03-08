@@ -1,7 +1,9 @@
 
-import type { BaseMessage, Context, Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../app";
+import type { BaseMessage, Context, LLMs, Message, Note,  Notebook, NotebookInstance, NoteInstance, Section, SectionInstance } from "../../../types";
 import {v4 as uuidv4} from 'uuid';
 import StorageService, { TimeFrame } from "./StorageService";
+import EndpointChatGPT from "$lib/SDK/LLMs/EndpointChatGPT";
+import LLMAPIService from "$lib/SDK/LLMAPIService";
 
 
 export enum ChatState{
@@ -15,112 +17,30 @@ export enum ChatState{
 
 
 export default class Chat{
-    private fetch: typeof fetch;
-    private messages:BaseMessage[];
-    private state:ChatState=ChatState.Entire_context;
-    private storage_service = new StorageService();
-
-
-
 
     public notebooks:NotebookInstance[]=[];
     public sections:{[key: string]: SectionInstance[]} = {};
     public notes:{[key:string]:NoteInstance[]} = {};
     public recorded_messages:{[key:string]:BaseMessage[]} = {};
     private action?:(...params:any[])=>void;
-    private update_function:(messages:BaseMessage[])=>void;
-    private update_context:(context:{notebook:string, section:string, note:string})=>void;
+    private update_function?:(messages:BaseMessage[])=>void;
+    private currentLLM:LLMAPIService;
+    
 
 
 
 
-    constructor(messages:BaseMessage[]=[],
-         update_function:(messages:BaseMessage[])=>void,
-         update_context:(context:{notebook:string, section:string,note:string})=>void,
-         customFetch: typeof fetch
-        ){
-        this.fetch = customFetch;
-        this.update_context = update_context;
-        this.update_function = update_function;
-        
-        if(messages.length == 0){
-            this.messages = [
-            ]
-        }else{
-            this.messages = messages;
-        }
+    constructor(currentLLM:LLMs){
+        this.currentLLM = LLMAPIService.LLMFactory(currentLLM);
     }
 
 
-
-    public get_messages(){
-        return this.messages;
-    }
-
-    public get_notebooks(){
-        return this.notebooks;
-    }
-
-    public get_sections(){
-        return this.sections;
-    }
-
-    public get_notes(){
-        return this.notes;
-    }
-
+ 
     public setUpdateFunction(func:(messages:BaseMessage[])=>void){
         this.update_function = func;
     }
-    /* Depricated
-    public async initialize_notes(){
-        const notes = this.storage_service.get("notes");
-        if(notes != null){
-            this.notes = notes.notes as {[key:string]:NoteInstance[]};
-        }else{
-            const notesMap = await this.get_all_notes();
-            this.notes = Object.fromEntries(notesMap) as { [key: string]: NoteInstance[] };
-            this.storage_service.store("notes",{
-                notes:this.notes,
-                expiration: this.storage_service.createExpiration(TimeFrame.Day,1)
-            });
-        }
-    }
 
-    public async initialize_sections(){
-        const sections = this.storage_service.get("sections");
-        if(sections != null){
-            this.sections = sections.sections as {[key:string]:SectionInstance[]};
-        }else{
-            const sectionsMap = await this.get_all_sections();
-            this.sections = Object.fromEntries(sectionsMap) as { [key: string]: SectionInstance[] };
-           
-            this.storage_service.store("sections",{
-                sections:this.sections,
-                expiration: this.storage_service.createExpiration(TimeFrame.Day,1)
-            });
-        }
-        
-    }
-    */
-
-    /**
-    Depricated
-    public async initialize_notebooks(){
-        const notebooks = this.storage_service.get("notebooks");
-        if(notebooks != null){
-            this.notebooks = notebooks.notebooks as NotebookInstance[];
-        }else{
-            this.notebooks = await this.get_all_notebooks();
-            this.storage_service.store("notebooks",{
-                notebooks:this.notebooks,
-                expiration: this.storage_service.createExpiration(TimeFrame.Day,1)
-            });
-        }
-
-    }
-
-    */
+    
 
     /*
     private chat_create_notebook(){
@@ -283,45 +203,22 @@ export default class Chat{
             text:"Nota creada con exito, todo lo que hablemos ahora sera almacenado en esta nota"
         } as Message]);
     }*/
-    /*
-    private async add_message_to_note(user_prompt:string, response:string){
-        await this.fetch("/API/QDrant/message/create",{
-            method:"POST",
-            body:JSON.stringify({
-                id:uuidv4(),
-                note_id:this.context?.note,
-                notebookId:this.context?.notebook,
-                sectionId:this.context?.section,
-                prompt:user_prompt,
-                response:response
-            })
-        })
-    }
-    */
+
     
 
     private async chat(prompt:string, context:Context){
-        const res = await this.fetch("/api/chatgpt",{
-            method:"POST",
-            headers: { 'Content-Type': 'application/json' },
-            body:JSON.stringify({
-                prompt:prompt,
-                context:context
-            })
-        })
-        return await res.json();
+       return await this.currentLLM.promptLLM(prompt,context)
     }
 
     private set_action(action:(...params:any[])=>void){
         this.action = action;
     }
 
-    private set_state(state:ChatState){
-        this.state = state;
-    }
 
     public async respond(params:string, context:Context){
-        this.update_function([{
+        console.log(context)
+        console.log("user text", params)
+        this.update_function!([{
             type:"normal",
             content:params,
             user_generated:true
@@ -329,12 +226,12 @@ export default class Chat{
  
 
         const res = await this.chat(params as string, context);
-            console.log(res);
-                this.update_function([{
-                    type:"normal",
-                    content:res,
-                    user_generated:false
-                } as BaseMessage])
+        console.log(res);
+        this.update_function!([{
+            type:"normal",
+            content:res.response,
+            user_generated:false
+        } as BaseMessage])
   
 
     }
