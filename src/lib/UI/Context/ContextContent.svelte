@@ -3,7 +3,7 @@
     import type { NotebookInstance, ContentType, SectionInstance, NoteInstance } from "../../../types";
     import ContextContent from "./ContextContent.svelte";
     import * as ContextMenu from "$lib/components/ui/context-menu/index.js";
-    export let context:NotebookInstance[]|SectionInstance[]|NoteInstance[];
+    export let context:NotebookInstance[] | SectionInstance[] | (SectionInstance | NoteInstance)[];
     export let level:number;
     export let key:ContentType|undefined;
     

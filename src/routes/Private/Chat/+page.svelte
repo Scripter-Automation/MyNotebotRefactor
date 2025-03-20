@@ -1,9 +1,9 @@
 <script lang="ts">
     
-    import { type Context, type Note, type Notebook, type NotebookInstance,  type Section,} from "../../../types";
+    import { ChatMode, type Context, type Note, type Notebook, type NotebookInstance,  type Section, type SummaryContext, type SummarySchema,} from "../../../types";
     import { Icon } from "svelte-icons-pack";
     import { firebaseStore } from "../../../store";
-    import type FirebaseService from "$lib/Services/Client/FirebaseService";
+    import FirebaseService from "$lib/Services/Client/FirebaseService";
     import { LuNotebookPen, LuBrainCircuit } from "svelte-icons-pack/lu";
     import { TrFillLayoutSidebarLeftCollapse, TrFillLayoutSidebarLeftExpand} from "svelte-icons-pack/tr";
     import SideBar from "$lib/UI/UserContentSidebar/SideBar.svelte";
@@ -12,7 +12,7 @@
     import { Toaster } from "$lib/components/ui/sonner";
     import { BsChatLeftTextFill } from "svelte-icons-pack/bs";
     import type { PageProps } from "./$types";
-    
+    import {v4 as uuidv4} from 'uuid';
     import ChatUi from "$lib/UI/Chat/ChatUI.svelte";
     import NotebookUi from "$lib/UI/NotebookMode/NotebookUi.svelte";
 
@@ -84,13 +84,19 @@
     */
     let open = [false,false];
 
-
+    let chat_container = "flex w-full";
     let chat_class =  "h-screen flex flex-col w-full"
     $: {
         if (open[0]) {
             chat_class = "h-screen flex flex-col w-3/4";
         } else {
             chat_class = "h-screen flex flex-col w-full";
+        }
+
+        if(open[1]){
+            chat_container = "flex w-3/4";
+        }else{
+            chat_container = "flex w-full";
         }
     }
 
@@ -113,14 +119,26 @@
         e.preventDefault();
         //console.log(e);
     }
+    
 
-    const Mode = {
-        Chat: "chat",
-        Notebook: "notebook"
-    };
+    
+    let mode:ChatMode = ChatMode.Chat;
 
-    let mode:string = Mode.Chat;
+    function set_chat_mode(new_mode:ChatMode){
+        mode = new_mode;
+    }
+    
+    let summary:SummaryContext = {title:"Short term memory", memory:[], object_type: "summary"};
 
+    function update_summary(new_summary:SummarySchema){
+
+        if(new_summary.new_memory || summary.memory.length == 0){
+            summary.memory = [...summary.memory , {id:uuidv4() ,summary:new_summary.summary, saved:false, object_type:"memory"}];
+        }else{
+            summary.memory[summary.memory.length-1] = {id:uuidv4() ,summary:new_summary.summary, saved:false, object_type:"memory"};
+        }
+
+    }
 
 </script>
 
@@ -145,12 +163,12 @@
                 </button>
             </div>
             <div class="flex items-center space-x-2">
-                {#if mode == Mode.Chat}
-                <button onclick={()=>mode = Mode.Notebook} class="p-2 hover:shadow-md hover:border rounded">
+                {#if mode == ChatMode.Chat}
+                <button onclick={()=>mode = ChatMode.Notebook} class="p-2 hover:shadow-md hover:border rounded">
                     <Icon className="text-xl" src={LuNotebookPen} ></Icon>
                 </button>
                 {:else}
-                    <button onclick={()=>mode = Mode.Chat} class="p-2 hover:shadow-md hover:border rounded">
+                    <button onclick={()=>mode = ChatMode.Chat} class="p-2 hover:shadow-md hover:border rounded">
                         <Icon className="text-xl" src={BsChatLeftTextFill} ></Icon>
                     </button>
                 {/if}
@@ -161,11 +179,11 @@
             </div>
         </div>
         <div class="flex flex-grow" ondragover={allowDrop} ondrop={handle_drop} role="main">
-            <div class="flex grow">
-                <main class="flex flex-col grow">
+            <div  class={chat_container}>
+                <main class="flex flex-col w-full">
                     
-                    {#if mode == Mode.Chat}
-                        <ChatUi {context}/>
+                    {#if mode == ChatMode.Chat}
+                        <ChatUi {context} {update_summary}/>
                     {:else}
                         <NotebookUi />
                     {/if}
@@ -173,7 +191,7 @@
             </div>
             
 
-                <ContextPanel {context} open={open[1]}></ContextPanel>
+                <ContextPanel {context} open={open[1]} summary={summary} {set_chat_mode}></ContextPanel>
             
         </div>
     </div>
