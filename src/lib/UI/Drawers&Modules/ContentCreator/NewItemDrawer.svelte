@@ -4,7 +4,7 @@
   import CreateNotebookForm from "./CreateNotebookForm.svelte";
   import CreateNoteForm from "./CreateNoteForm.svelte";
   import CreateSectionForm from "./CreateSectionForm.svelte";
-  import type {NotebookInstance} from "../../../../app";
+  import type {NotebookInstance} from "../../../../types";
   export let drawer_toggle: boolean = false;
   export let drawer_context: string = "";
   export let toggle_drawer: () => void;

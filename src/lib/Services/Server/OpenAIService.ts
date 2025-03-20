@@ -12,6 +12,7 @@ export default class OpenAIService {
         });
     }
 
+    // This method should be renamed to prompt
     public async chat(messages: ChatCompletionMessageParam[]) {
         let completion
         try{

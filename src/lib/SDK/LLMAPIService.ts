@@ -1,26 +1,16 @@
-import type { Conversation } from "../../app";
-
+import type { Context, Conversation, SummarySchema } from "../../types";
+import { LLMs } from "../../types";
 
 export default abstract class LLMAPIService{
-    abstract endpoints:{[key:string]:string};
-    abstract chatHistory: Conversation[];
-    abstract developerInstructions?:string;
+    protected abstract endpoints:{[key:string]:string};
     static ChatSummary:string = ""
 
-    abstract promptLLM(prompt:string):Promise<{success:boolean, message:string, response:string}>;
-    abstract streamLLM(prompt:string):Promise<{success:boolean, message:string, response:string}>;
+    abstract promptLLM(prompt:string, context:Context):Promise<{success:boolean, message:string, response:string}>;
+    abstract streamLLM(prompt:string, context:Context):Promise<{success:boolean, message:string, response:string}>;
     
-    protected updateDeveloperInsturctions(instruction:string){
-        this.developerInstructions = instruction;
-    }
+    abstract summarize(prompt:string, response:string):Promise<{success:boolean, message:string, response:SummarySchema}>
 
-    protected updateChatHistory(conversation:Conversation){
-        this.chatHistory.push(conversation)
-    }
 
-    protected clearChatHistory(){
-        this.chatHistory = []
-    }
 
     static updateChatSummary(summary:string){
         this.ChatSummary = summary;
@@ -29,4 +19,18 @@ export default abstract class LLMAPIService{
     static getChatSummary(){
         return this.ChatSummary;
     }
+
+    public static async LLMFactory(llm: LLMs): Promise<LLMAPIService> {
+        switch (llm) {
+            case LLMs.gpt4o:
+                const { default: ChatGPT } = await import("./LLMs/EndpointChatGPT");
+                return new ChatGPT();
+            case LLMs.gemini:
+                const { default: Gemini } = await import("./LLMs/EndpointGemini");
+                return new Gemini();
+            default:
+                throw new Error("LLM not found");
+        }
+    }
+    
 }

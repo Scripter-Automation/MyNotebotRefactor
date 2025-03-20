@@ -1,9 +1,9 @@
-import type { Section, SectionBuilder, SectionInstance } from "../../../app";
+import { ContentType, type SectionBuilder, type SectionInstance } from "../../../types";
 import type { Item } from "../../Services/Client/StorageService";
 import APIService from "../APIService";
 
 
-export default class SectionEndpoint extends APIService {
+export default class EndpointSection extends APIService {
     endpoint: string = "/api/qdrant/section";
 
     constructor(){
@@ -24,7 +24,7 @@ export default class SectionEndpoint extends APIService {
     }
     async create(params:SectionBuilder): Promise<{ success: boolean; message: string; object?: SectionInstance}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:"sections", children:[]}
+            params = {...params, id:this.generate_UID() ,object_type:ContentType.sections, children:[]}
             await fetch(this.endpoint + "/create", {
                 method: "POST",
                 body: JSON.stringify(params)

@@ -5,8 +5,9 @@
     import {Textarea} from "$lib/components/ui/textarea"
     import { toast } from "svelte-sonner";
     import * as Select from "$lib/components/ui/select/index.js";
-    import type { NotebookInstance, SectionBuilder, SectionInstance } from "../../../../app";
-    import SectionEndpoint from "$lib/SDK/VectorDB/SectionEndpoint";
+    import type { NotebookInstance, SectionBuilder, SectionInstance } from "../../../../types";
+    import EndpointSection from "$lib/SDK/VectorDB/EndpointSection";
+
 
 
     export let toggle_drawer:()=>void;
@@ -22,7 +23,7 @@
         const formDataObject = Object.fromEntries(data.entries()) as SectionBuilder;
         formDataObject.notebookId = content[selected_notebook].id as string;
 
-        const res = await new SectionEndpoint().create(formDataObject)
+        const res = await new EndpointSection().create(formDataObject)
 
         
         

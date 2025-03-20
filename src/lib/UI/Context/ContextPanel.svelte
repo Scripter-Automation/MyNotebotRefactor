@@ -1,20 +1,31 @@
 <script lang="ts">
-    import type { ContentType, Context, Notebook, Section } from "../../../app";
+    import { ChatMode, ContentType, type Context, type Notebook, type Section, type SummaryContext as Summary } from "../../../types";
     import ContextContent from "./ContextContent.svelte";
+    import SummaryContext from "./SummaryContext.svelte";
 
 
     export let open:boolean;
     export let context:Context;
+    export let summary: Summary;
+    export let set_chat_mode: (mode:ChatMode) => void;
+
+    console.log("context panel summary", summary)
+
 
 
     let sidebarClass = "hidden flex items-center justify-center p-2 pr-4 pl-0";
 
     $: { if(open){
-            sidebarClass= sidebarClass.replace("hidden", "w-1/3");
+            sidebarClass= sidebarClass.replace("hidden", "w-1/4");
         }else{
-            sidebarClass = sidebarClass.replace("w-1/3", "hidden");
+            sidebarClass = sidebarClass.replace("w-1/4", "hidden");
         }
     }
+
+    function deleteShortTermMemory(){
+        summary.memory = [];
+    }
+
     function removeChild(key:ContentType, index:number[],level:number){
         if(level == 0){
             context[key].splice(index[0],1);
@@ -23,7 +34,6 @@
             (context[key][index[0]].children as any[]).splice(index[1],1);
             context = context;
         }else if(level==2){
-            console.log("remove note");
             
             (context[key][index[0]]!.children![index[1]].children as any[]).splice(index[2],1);
             
@@ -40,5 +50,8 @@
                     <ContextContent removeChild={removeChild} key={key as ContentType} level={0} context={context[key as ContentType]} />
             {/if}
         {/each}
+        {#if summary.memory.length > 0}
+            <SummaryContext {summary} {deleteShortTermMemory} {set_chat_mode}/>
+        {/if}
     </section>
 </div>
