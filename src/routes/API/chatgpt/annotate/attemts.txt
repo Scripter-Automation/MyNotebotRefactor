@@ -1,0 +1,45 @@
+    const HeaderBlock = z.object({
+        type: z.literal("header"),
+        data: z.object({
+          text: z.string(),
+          level: z.number().int().min(1).max(6), // Restrict level to 1–6
+        }),
+      });
+
+    const ListItem:z.ZodType<any> = z.object({
+        content: z.string(),
+        meta: z.object({
+          checked: z.boolean().optional(),
+        }),
+        items: z.array(z.lazy(() => ListItem)).optional(), // Recursive for nested lists
+    });
+      
+    const ListBlock = z.object({
+        type: z.literal("list"),
+        data: z.object({
+          style: z.enum(["ordered", "unordered", "checklist"]),
+          items: z.array(ListItem),
+        }),
+    });
+      
+    const Block = z.union([HeaderBlock, ListBlock]);
+
+
+    const OutputBlockData = z.object({
+        id: z.string().optional(),
+        type: z.string(),
+        data: z.any(), // Use the `Block` schema to validate specific types
+        tunes: z.record(z.string(), z.any()).optional(),
+    });
+    
+    const OutputData = z.object({
+        version: z.string().optional(),
+        time: z.number().optional(),
+        blocks: z.array(Block),
+    });
+      
+    const notestructure = z.object(
+        {
+            notestructure:z.array(Block)
+        }
+    );

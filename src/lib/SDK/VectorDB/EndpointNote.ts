@@ -23,7 +23,7 @@ export default class EndpointNote extends APIService{
     }
     async create(params: NoteBuilder): Promise<{ success: boolean; message: string; object?: NoteInstance;}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:ContentType.notes}
+            params = {...params, id:APIService.generate_UID() ,object_type:ContentType.notes}
             fetch(this.endpoint+"/create",
                 {
                     method:"POST",

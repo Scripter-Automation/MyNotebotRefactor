@@ -5,6 +5,7 @@ import { goto } from "$app/navigation";
 import type { Persistence } from "firebase/auth";
 import StorageService from "./StorageService";
 import EndpointUserCookies from "$lib/SDK/Cookies/EndpointUserCookies";
+import { clearStores } from "../../../store";
 
 
 export default class FirebaseService {
@@ -61,6 +62,7 @@ export default class FirebaseService {
         await signOut(this.auth);
         await new EndpointUserCookies().delete();
         StorageService.DeleteAll();
+        clearStores();
         goto("/")
     }
 

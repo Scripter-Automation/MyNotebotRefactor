@@ -24,7 +24,7 @@ export default class EndpointSection extends APIService {
     }
     async create(params:SectionBuilder): Promise<{ success: boolean; message: string; object?: SectionInstance}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:ContentType.sections, children:[]}
+            params = {...params, id:APIService.generate_UID() ,object_type:ContentType.sections, children:[]}
             await fetch(this.endpoint + "/create", {
                 method: "POST",
                 body: JSON.stringify(params)

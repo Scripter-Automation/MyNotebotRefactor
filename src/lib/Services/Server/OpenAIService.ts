@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import OpenAI from "openai";
+import type { AutoParseableResponseFormat } from "openai/lib/parser.mjs";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
 export default class OpenAIService {
@@ -41,5 +42,24 @@ export default class OpenAIService {
             input
         })
         return embedding.data[0].embedding;
+    }
+
+    public async annotate(messages: ChatCompletionMessageParam[] , response_format?:AutoParseableResponseFormat<any>){
+        let completion
+        try{
+            completion = await this.app.beta.chat.completions.parse({
+                model: "gpt-4o-2024-08-06",
+                messages: [
+                    ...messages
+                ],
+                response_format: response_format || undefined
+            });
+        }catch(error){
+
+            console.error(error);
+            throw new Error("Error creating anotation");
+        }
+
+        return completion.choices[0].message.parsed
     }
 }

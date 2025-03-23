@@ -44,10 +44,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         ${data.prompt}
     `
     console.log("context", context);
-    const res = await openai.chat([{role:"user", content:context}]);
+    const res = await openai.chat([
+        {role:"system", content:"You are an assistant focused on producing answers for the user. Memory will be managed externally via a vectorDB. You will receive relevant context when needed and should assume you have this memory. Never say you cannot remember things or store data; instead, answer using the provided context or say you will remember the information for future reference."},
+        {role:"system", content:"Your answer is going to be rendered using the following markdown library, please use it to format your answers https://www.npmjs.com/package/@humanspeak/svelte-markdown"},
+        {role:"user", content:context}
+    ]);
     console.log(res);
 
-    return new Response(JSON.stringify(res), {
+    return new Response(JSON.stringify({res, embeding}), {
         status: 200,
         headers: {
             'Content-Type': 'text/plain'

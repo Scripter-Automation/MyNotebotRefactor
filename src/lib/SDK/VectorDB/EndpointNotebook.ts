@@ -11,7 +11,7 @@ export default class EndpointNotebook extends APIService {
 
     async create(params: NotebookBuilder): Promise<{success:boolean,message:string, object?:NotebookInstance}> {
         try{
-            params = {...params, id:this.generate_UID() ,object_type:ContentType.notebooks, children:[]}
+            params = {...params, id:APIService.generate_UID() ,object_type:ContentType.notebooks, children:[]}
             await fetch(this.endpoint + "/create", {
                 method: "POST",
                 body: JSON.stringify(params)

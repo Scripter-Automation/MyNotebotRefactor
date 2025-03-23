@@ -1,11 +1,12 @@
 <script lang="ts">
     
-    import { ChatMode, type Context, type Note, type Notebook, type NotebookInstance,  type Section, type SummaryContext, type SummarySchema,} from "../../../types";
+    import { ChatMode, type Context, type MemorySchema, type Note, type Notebook, type NotebookInstance,  type Section, type SummaryContext, type SummarySchema,} from "../../../types";
     import { Icon } from "svelte-icons-pack";
     import { firebaseStore } from "../../../store";
     import FirebaseService from "$lib/Services/Client/FirebaseService";
     import { LuNotebookPen, LuBrainCircuit } from "svelte-icons-pack/lu";
     import { TrFillLayoutSidebarLeftCollapse, TrFillLayoutSidebarLeftExpand} from "svelte-icons-pack/tr";
+    import { BsBookmark } from "svelte-icons-pack/bs";
     import SideBar from "$lib/UI/UserContentSidebar/SideBar.svelte";
     import ContextPanel from "$lib/UI/Context/ContextPanel.svelte";
     import NewItemDrawer from "$lib/UI/Drawers&Modules/ContentCreator/NewItemDrawer.svelte";
@@ -15,6 +16,7 @@
     import {v4 as uuidv4} from 'uuid';
     import ChatUi from "$lib/UI/Chat/ChatUI.svelte";
     import NotebookUi from "$lib/UI/NotebookMode/NotebookUi.svelte";
+    import SummaryUi from "$lib/UI/Summary/SummaryUi.svelte";
 
     /**
     * Gets the props loaded in the page.ts which gets the instance of the chat service and context service
@@ -128,16 +130,14 @@
         mode = new_mode;
     }
     
-    let summary:SummaryContext = {title:"Short term memory", memory:[], object_type: "summary"};
 
-    function update_summary(new_summary:SummarySchema){
 
-        if(new_summary.new_memory || summary.memory.length == 0){
-            summary.memory = [...summary.memory , {id:uuidv4() ,summary:new_summary.summary, saved:false, object_type:"memory"}];
-        }else{
-            summary.memory[summary.memory.length-1] = {id:uuidv4() ,summary:new_summary.summary, saved:false, object_type:"memory"};
-        }
+    let memory:MemorySchema = {};
 
+    function update_memories(new_memories:MemorySchema){
+        console.log("here")
+        console.log("updateing memory schema", new_memories)
+        memory = new_memories;
     }
 
 </script>
@@ -175,6 +175,9 @@
                 <button class="p-2 hover:shadow-md hover:border rounded" onclick={()=>open[1] = !open[1]}>
                     <Icon className="text-xl" src={LuBrainCircuit} ></Icon>
                 </button>
+                <button class="p-2 hover:shadow-md hover:border rounded" onclick={()=>mode = ChatMode.Summary}>
+                    <Icon className="text-xl" src={BsBookmark} ></Icon>
+                </button>
                 <button onclick={logout} class="hidden md:block border-2 border-red-500 hover:bg-red-500 active:bg-red-700 p-2 rounded active:text-white hover:text-white">Cerrar Sesión</button>
             </div>
         </div>
@@ -183,15 +186,17 @@
                 <main class="flex flex-col w-full">
                     
                     {#if mode == ChatMode.Chat}
-                        <ChatUi {context} {update_summary}/>
-                    {:else}
+                        <ChatUi {context} />
+                    {:else if mode == ChatMode.Notebook}
                         <NotebookUi />
+                    {:else}
+                        <SummaryUi/>
                     {/if}
                 </main>
             </div>
             
 
-                <ContextPanel {context} open={open[1]} summary={summary} {set_chat_mode}></ContextPanel>
+                <ContextPanel {context} open={open[1]} {set_chat_mode}></ContextPanel>
             
         </div>
     </div>

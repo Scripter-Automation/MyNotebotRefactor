@@ -1,10 +1,10 @@
 <script lang="ts">
     import DotPattern from "./DotPattern.svelte";
-    import {NoteContext} from "../../../store";
+    import {ContextMemory} from "../../../store";
     import { LuBrain, LuNotebookPen } from "svelte-icons-pack/lu";
     import { Icon } from "svelte-icons-pack";
     import { NotebookMode, type SummaryContext } from "../../../types";
-    import type { Memmory, NoteInstance } from "../../../types";
+    import type { Memory, MemorySchema, NoteInstance } from "../../../types";
     import { BiSave } from "svelte-icons-pack/bi";
     import { BsInfo } from "svelte-icons-pack/bs";
     import * as AlertDialog from "$lib/components/ui/alert-dialog";
@@ -14,27 +14,23 @@
     let infoModule:boolean = false;
 
 
-    let context: SummaryContext | NoteInstance = {} as SummaryContext | NoteInstance;
-    NoteContext.subscribe(value=>
+    let context: MemorySchema = {} as MemorySchema;
+    ContextMemory.subscribe(value=>
      context = value
     );
     console.log("context", context)
 
     let memory_length = 0;
     let mode:NotebookMode;
-    let memmories:Memmory[];
+    let memmories:Memory[];
     
-    if(context.memory.length == 0){
+    if(Object.keys(context).length == 0){
         mode = NotebookMode.Note;
         memmories = [];
-    }else if(context.object_type == "summary"){
-        memory_length = context.memory.length;
-        mode = NotebookMode.Memory;
-        memmories = context.memory;
     }else{
-        memory_length = context.memory.length;
+        memory_length = Object.keys(context).length;
         mode = NotebookMode.Note;
-        memmories = context.memory;
+        memmories = Object.values(context);
     }
 
     function toggle_mode(){
@@ -85,7 +81,7 @@
                             </button>
                         </div>
                     </div>
-                    <p>{memory.summary}</p>
+                    <p>{memory.text}</p>
                 </div>
             {/each}
         </div>

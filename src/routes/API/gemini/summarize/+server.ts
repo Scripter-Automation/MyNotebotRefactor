@@ -9,11 +9,10 @@ export const POST: RequestHandler = async ({ request }) => {
             Eres una heramienta para generar resumenes de conversaciones,
             debes de ser capaz de tomar un resumen anterior de la conversación, procesar
             la nueva interacción de la conversación y generar un resumen actualizado de la conversación.
-            Tu proposito es generar memorias que seran almacenadas en una base de datos de vectores. Por lo tanto
-            si crees que el tema de la conversación esta cambiando, ó si el resumen de la conversación es
-            demasiado largo debes sugerir que se cree una nueva memoria.
-            En caso de sugerir una nueva memoria, debes de indicar que se debe crear un resumen nuevo empezando
-            desde la nueva interacción de la conversación.
+            Debes de captar la mayor cantidad de detalle en la menor cantidad de texto posible. Ya que el resumen que 
+            vas a generar sera enviado a otro LLM para recordar lo que ha sucedido en la conversación.
+
+            Siempre contesta en el mismo idioma que el usuario
 
             **Resumen de la conversación anterior:**
             ${data.summary as string}
@@ -25,11 +24,6 @@ export const POST: RequestHandler = async ({ request }) => {
                 summary: {
                     type: SchemaType.STRING,
                     description: "Resumen de una conversación",
-                    nullable: false
-                },
-                new_memory:{
-                    type: SchemaType.BOOLEAN,
-                    description: "Indica si se debe de crear una nueva memoria",
                     nullable: false
                 }
             }

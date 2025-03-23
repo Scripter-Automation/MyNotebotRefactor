@@ -1,7 +1,9 @@
 <script lang="ts">
     import type { BaseMessage } from "../../../types";
+    import SvelteMarkdown from '@humanspeak/svelte-markdown'
 
     export let message:BaseMessage
+
     
     
 </script>
@@ -32,10 +34,8 @@
     </div>  
 {:else if message.type == "normal"}
 <div class="w-11/12 space-y-4 my-4 ml-4 p-4 self-start rounded border-b">
-
-    <p class="p-2">
-        {message.content}
-    </p>
+    <SvelteMarkdown source={message.content}></SvelteMarkdown>
+    
 
 </div>
 {/if}

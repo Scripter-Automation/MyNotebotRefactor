@@ -13,7 +13,7 @@ export default abstract class APIService{
       this.storageService = new StorageService();
       
     }
-    public generate_UID():string{
+    public static generate_UID():string{
       return uuidv4();
     }
     abstract get(params?:any):Promise<any>;

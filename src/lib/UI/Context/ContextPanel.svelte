@@ -1,15 +1,13 @@
 <script lang="ts">
-    import { ChatMode, ContentType, type Context, type Notebook, type Section, type SummaryContext as Summary } from "../../../types";
+    import LLMAPIService from "$lib/SDK/LLMAPIService";
+import { ChatMode, ContentType, type Context, type MemorySchema, type Notebook, type Section, type SummaryContext as Summary } from "../../../types";
     import ContextContent from "./ContextContent.svelte";
     import SummaryContext from "./SummaryContext.svelte";
 
 
     export let open:boolean;
     export let context:Context;
-    export let summary: Summary;
     export let set_chat_mode: (mode:ChatMode) => void;
-
-    console.log("context panel summary", summary)
 
 
 
@@ -22,9 +20,7 @@
         }
     }
 
-    function deleteShortTermMemory(){
-        summary.memory = [];
-    }
+
 
     function removeChild(key:ContentType, index:number[],level:number){
         if(level == 0){
@@ -44,14 +40,14 @@
 </script>
 <div class={sidebarClass}>
     <section class="h-[80%] p-2 border w-full rounded overflow-hidden flex flex-col items-center justify-start">
-        <h3 class="font-bold text-xl font-mono">Context Memory</h3>
+        <h3 class="font-bold text-xl font-mono">Memoria</h3>
         {#each Object.keys(context) as key}
             {#if context[key as ContentType].length > 0}
                     <ContextContent removeChild={removeChild} key={key as ContentType} level={0} context={context[key as ContentType]} />
             {/if}
         {/each}
-        {#if summary.memory.length > 0}
-            <SummaryContext {summary} {deleteShortTermMemory} {set_chat_mode}/>
-        {/if}
+        
+        <SummaryContext  {set_chat_mode}/>
+        
     </section>
 </div>

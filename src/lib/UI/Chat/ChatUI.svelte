@@ -1,5 +1,5 @@
 <script lang="ts">
-    import  { LLMs, type BaseMessage, type Context, type SummarySchema } from "../../../types";
+    import  { LLMs, type BaseMessage, type Context, type MemorySchema, type SummarySchema } from "../../../types";
     import MessageComponent from "./MessageComponent.svelte";
     import ChatService from "$lib/Services/Client/ChatService";
     import SpeachService from "$lib/Services/Client/SpeachService";
@@ -8,7 +8,8 @@
     import StorageService, { TimeFrame } from "$lib/Services/Client/StorageService";
 
     export let context:Context;
-    export let update_summary: (new_summary:SummarySchema) => void;
+
+
     let speach_service = new SpeachService();
     
     let storage_service = new StorageService();
@@ -34,12 +35,6 @@
         }
         storage_service.store("messages", {messages:messages, expiration:storage_service.createExpiration(TimeFrame.Day,1)});
     }
-
-
-
-    chat_service.setSummaryUpdateFunction(update_summary);
-
-
 
 
     chat_service.setUpdateFunction(update_messages);

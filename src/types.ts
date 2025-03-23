@@ -72,18 +72,22 @@ interface NoteInstance extends Note {
     children: undefined;
     embeding: string[];
     content: NoteFile;
-    memory: Memmory[];
+    memory: Memory[];
 }
 
 // Serves to store summaries of a note that helps
 // retreive information from the rag aplication
 // their id is the same as the note id
-interface Memmory {
+interface Memory {
     id: string;
-    object_type: "memory";
-    summary: string;
-    saved:boolean;
+    title?:string;
+    text: string;
+    saved: boolean;
+    embeding: number[];
+    [key:string]: any;
 }
+
+
 
 
 
@@ -138,7 +142,7 @@ enum ContentType {
 interface SummaryContext {
     title: string;
     object_type: "summary";
-    memory: Memmory[];
+    memory: string;
 }
 
 
@@ -217,12 +221,16 @@ type MessageModel<T extends LLMs> = T extends LLMs.gpt4o | LLMs.gpt3turbo ?
 
 type SummarySchema = {
     summary:string;
-    new_memory:boolean;
 }
+
+type MemorySchema = {
+    [key:string]: Memory;
+};
 
 enum ChatMode {
     Chat ="chat",
-    Notebook = "notebook"
+    Notebook = "notebook",
+    Summary = "summary"
 }
 
 enum NotebookMode {
@@ -231,4 +239,4 @@ enum NotebookMode {
 }
 
 
-export {type BaseMessage, type MessageModel,  type RoleType, ChatGPTRoleType, OtherRoleType, LLMs, type Conversation, type Context, ContentType, type Notebook, type NotebookCreator, type NotebookBuilder, type NotebookInstance, type  Section, type SectionCreator, type SectionBuilder, type SectionInstance, type Note, type NoteCreator, type NoteInstance, type NoteBuilder, type Message, type SummarySchema, type SummaryContext, ChatMode, NotebookMode, type Memmory};
+export {type BaseMessage, type MessageModel,  type RoleType, ChatGPTRoleType, OtherRoleType, LLMs, type Conversation, type Context, ContentType, type Notebook, type NotebookCreator, type NotebookBuilder, type NotebookInstance, type  Section, type SectionCreator, type SectionBuilder, type SectionInstance, type Note, type NoteCreator, type NoteInstance, type NoteBuilder, type Message, type SummarySchema, type SummaryContext, ChatMode, NotebookMode, type Memory, type MemorySchema};
