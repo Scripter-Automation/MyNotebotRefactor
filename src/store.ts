@@ -3,8 +3,21 @@ import FirebaseService from "$lib/Services/Client/FirebaseService";
 import type { MemorySchema, NoteInstance, SummaryContext } from "./types";
 import type { NoteContext } from "./zodTypes";
 
-const firebaseService = new FirebaseService();
-export const firebaseStore = readable(firebaseService);
+let firebaseService: FirebaseService | null = null;
+
+export function getFirebaseService() {
+    if (!firebaseService) {
+        firebaseService = new FirebaseService();
+    }
+    return firebaseService;
+}
+
+// Use a function to lazily initialize the store
+export const firebaseStore = readable<FirebaseService | null>(null, (set) => {
+    const service = getFirebaseService();
+    set(service);
+    return () => {}; // Cleanup function (not needed here)
+});
 
 export const ContextSummary = writable<SummaryContext>(
     {

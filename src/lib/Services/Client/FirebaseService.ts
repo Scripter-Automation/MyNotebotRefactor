@@ -1,8 +1,6 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app"
-import { type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth"
-import { serialize } from "cookie";
+import { type Auth, createUserWithEmailAndPassword, getAuth,  signInWithEmailAndPassword, signOut, } from "firebase/auth"
 import { goto } from "$app/navigation";
-import type { Persistence } from "firebase/auth";
 import StorageService from "./StorageService";
 import EndpointUserCookies from "$lib/SDK/Cookies/EndpointUserCookies";
 import { clearStores } from "../../../store";

@@ -1,6 +1,7 @@
 import { initializeApp, getApps, type App, cert } from 'firebase-admin/app';
 import { Auth, getAuth, UserRecord, type DecodedIdToken } from 'firebase-admin/auth';
 import { config } from 'dotenv';
+
 export default class FirebaseAdminService {
     private app: App;
     private auth: Auth;
